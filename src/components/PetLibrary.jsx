@@ -1,138 +1,251 @@
-import { useState } from 'react';
-import { Search, Plus, Eye, Filter, X, ChevronDown } from 'lucide-react';
-import { mockPets } from '../data/mockData';
+import { useState, useEffect, useMemo } from 'react';
+import {
+  Activity,
+  AlertTriangle,
+  BarChart3,
+  CalendarDays,
+  ChevronDown,
+  DollarSign,
+  Eye,
+  Filter,
+  Gauge,
+  Leaf,
+  Plus,
+  Search,
+  Sparkles,
+  ThermometerSun,
+  UserRoundPlus,
+  UsersRound,
+  X,
+} from 'lucide-react';
+import { getLivestockModules, addLivestockModule, STORAGE_EVENTS } from '../lib/storage';
+import { financialProjection } from '../data/mockData';
 import { clsx } from 'clsx';
 
 const statusConfig = {
-  success: { class: 'badge-success', label: '' },
-  warning: { class: 'badge-warning', label: '' },
-  danger: { class: 'badge-danger', label: '' },
-  info: { class: 'badge-info', label: '' },
+  success: { class: 'badge-success' },
+  warning: { class: 'badge-warning' },
+  danger: { class: 'badge-danger' },
+  info: { class: 'badge-info' },
 };
 
-const speciesOptions = ['Todos', 'Perro', 'Gato', 'Vaca', 'Alpaca', 'Pez'];
+const speciesOptions = ['Todos', 'Aves de postura', 'Aves de carne', 'Aves menores', 'Aves acuaticas', 'Expansion'];
 
-function PetCard({ pet, onViewDetail }) {
+function ModuleCard({ module, onViewDetail }) {
   return (
     <div
-      id={`pet-card-${pet.id}`}
-      className="glass-card p-5 hover:border-emerald-300 hover:shadow-lg transition-all duration-300 
-                 group hover:-translate-y-1 flex flex-col bg-white"
+      id={`pet-card-${module.id}`}
+      className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-lg sm:p-5"
     >
-      {/* Card header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div
-            className={clsx(
-              'w-12 h-12 rounded-2xl flex items-center justify-center text-2xl',
-              'bg-slate-50 border border-slate-100 group-hover:scale-110 transition-transform duration-300',
-            )}
-          >
-            {pet.emoji}
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-amber-50 text-3xl shadow-sm transition-transform duration-300 group-hover:scale-105 sm:h-14 sm:w-14">
+            <span aria-hidden="true">{module.emoji || '🐔'}</span>
+            <span className="absolute -bottom-1 -right-1 rounded-md border border-emerald-100 bg-white px-1.5 py-0.5 text-[10px] font-black text-emerald-700 shadow-sm">
+              {module.code}
+            </span>
           </div>
-          <div>
-            <h3 className="text-base font-bold text-slate-900 leading-tight group-hover:text-emerald-700 transition-colors">{pet.name}</h3>
-            <p className="text-xs text-slate-500 font-medium">{pet.species}</p>
+          <div className="min-w-0">
+            <h3 className="text-sm font-black leading-tight text-slate-900 transition-colors group-hover:text-emerald-700 sm:text-base">
+              {module.name}
+            </h3>
+            <p className="text-xs font-medium text-slate-500">{module.species}</p>
           </div>
         </div>
-        <span className={clsx('badge', statusConfig[pet.statusType]?.class || 'badge-info')}>
-          {pet.status}
+        <span className={clsx('badge max-w-[112px] shrink-0 justify-center text-center leading-tight', statusConfig[module.statusType]?.class || 'badge-info')}>
+          {module.status}
         </span>
       </div>
 
-      {/* Pet details */}
-      <div className="grid grid-cols-2 gap-2 mb-4 flex-1">
+      <div className="mb-4 grid grid-cols-2 gap-2">
         {[
-          { label: 'Raza', value: pet.breed },
-          { label: 'Edad', value: pet.age },
-          { label: 'Peso', value: pet.weight },
-          { label: 'Dueño', value: pet.ownerName.split(' ')[0] },
+          { label: 'Lote', value: module.flockSize || 'Config.' },
+          { label: 'Produccion', value: module.production || '0' },
+          { label: 'Eficiencia', value: module.efficiency || '0%' },
+          { label: 'Alertas', value: module.alerts || 0 },
         ].map(({ label, value }) => (
-          <div key={label} className="p-2 rounded-lg bg-slate-50 border border-slate-100">
-            <p className="text-xs text-slate-500 mb-0.5 font-medium">{label}</p>
-            <p className="text-xs font-bold text-slate-800 truncate">{value}</p>
+          <div key={label} className="min-w-0 rounded-xl border border-slate-100 bg-slate-50 p-3">
+            <p className="mb-1 text-[11px] font-bold uppercase text-slate-400">{label}</p>
+            <p className="text-xs font-black leading-tight text-slate-800 sm:truncate">{value}</p>
           </div>
         ))}
       </div>
 
-      {/* Next vaccine */}
-      <div className="flex items-center justify-between mb-4 p-2.5 rounded-lg bg-amber-50 border border-amber-100">
-        <span className="text-xs text-slate-600 font-semibold">Próxima vacuna</span>
-        <span className="text-xs font-bold text-amber-700">
-          {pet.nextVaccine === 'N/A'
-            ? 'N/A'
-            : new Date(pet.nextVaccine).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })}
-        </span>
+      <div className="mb-4 rounded-xl border border-amber-100 bg-amber-50 p-3">
+        <div className="flex items-center gap-2 text-amber-700">
+          <Sparkles size={14} />
+          <span className="text-xs font-black">Recomendacion IA</span>
+        </div>
+        <p className="mt-2 line-clamp-2 text-xs font-medium leading-relaxed text-slate-700">{module.notes}</p>
       </div>
 
-      {/* Notes */}
-      <p className="text-xs text-slate-600 leading-relaxed mb-4 line-clamp-2">{pet.notes}</p>
-
-      {/* Actions */}
-      <button
-        onClick={() => onViewDetail(pet)}
-        className="btn-secondary w-full justify-center text-sm py-2"
-      >
-        <Eye size={14} />
-        Ver Detalle
-      </button>
+      <div className="mt-auto flex gap-2">
+        <button onClick={() => onViewDetail(module)} className="btn-secondary flex-1 justify-center text-sm">
+          <Eye size={14} />
+          Ver modulo
+        </button>
+      </div>
     </div>
   );
 }
 
-function PetDetailModal({ pet, onClose }) {
-  if (!pet) return null;
+function ModuleDetailModal({ module, onClose }) {
+  if (!module) return null;
+
+  const isLayerModule = module.name.includes('Ponedoras');
+  const recommendations = isLayerModule
+    ? [
+        'Mantener 14 a 16 horas de luz constante para estabilizar postura.',
+        'Revisar bebederos dos veces al dia si la temperatura supera 28 C.',
+        'Registrar huevos por la manana y tarde para detectar bajas reales.',
+      ]
+    : [
+        'Registrar consumo diario y peso promedio para ajustar conversion alimenticia.',
+        'Vigilar ventilacion, densidad y limpieza para reducir riesgo sanitario.',
+        'Comparar produccion semanal contra objetivo del modulo.',
+      ];
+
   return (
     <div
-      className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-60 flex items-end justify-center bg-slate-950/60 p-0 backdrop-blur-sm animate-fade-in sm:items-center sm:p-4"
       onClick={onClose}
     >
       <div
         id="pet-detail-modal"
-        className="glass-card w-full max-w-lg p-6 animate-slide-up bg-white"
+        className="max-h-[92dvh] w-full max-w-3xl overflow-y-auto rounded-t-3xl border border-slate-200 bg-white p-4 shadow-2xl animate-slide-up sm:max-h-[90vh] sm:rounded-2xl sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-4xl">
-              {pet.emoji}
+        <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-slate-200 sm:hidden" />
+        <div className="sticky top-0 z-10 -mx-4 mb-4 border-b border-slate-100 bg-white/95 px-4 pb-4 backdrop-blur sm:static sm:mx-0 sm:mb-6 sm:border-b-0 sm:bg-transparent sm:px-0 sm:pb-0">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+            <div className="relative flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-amber-50 text-4xl shadow-sm sm:h-16 sm:w-16">
+              <span aria-hidden="true">{module.emoji || '🐔'}</span>
+              <span className="absolute -bottom-1 -right-1 rounded-md border border-emerald-100 bg-white px-1.5 py-0.5 text-[10px] font-black text-emerald-700 shadow-sm">
+                {module.code}
+              </span>
             </div>
-            <div>
-              <h2 className="text-xl font-black text-slate-900">{pet.name}</h2>
-              <p className="text-slate-500 text-sm font-medium">{pet.species} · {pet.breed}</p>
-              <span className={clsx('badge mt-1.5', statusConfig[pet.statusType]?.class || 'badge-info')}>
-                {pet.status}
+            <div className="min-w-0">
+              <h2 className="text-lg font-black leading-tight text-slate-900 sm:text-xl">{module.name}</h2>
+              <p className="text-sm font-medium text-slate-500">{module.species} · {module.breed || 'N/A'}</p>
+              <span className={clsx('badge mt-2', statusConfig[module.statusType]?.class || 'badge-info')}>
+                {module.status}
               </span>
             </div>
           </div>
           <button
             id="modal-close-btn"
             onClick={onClose}
-            className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-700"
           >
             <X size={18} />
           </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {[
-            { label: 'Edad', value: pet.age },
-            { label: 'Peso', value: pet.weight },
-            { label: 'Dueño', value: pet.ownerName },
-            { label: 'DNI Dueño', value: pet.ownerDni },
-            { label: 'Último Chequeo', value: new Date(pet.lastCheckup).toLocaleDateString('es-PE') },
-            { label: 'Próxima Vacuna', value: pet.nextVaccine === 'N/A' ? 'N/A' : new Date(pet.nextVaccine).toLocaleDateString('es-PE') },
-          ].map(({ label, value }) => (
-            <div key={label} className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-              <p className="text-xs text-slate-500 mb-1 font-medium">{label}</p>
-              <p className="text-sm font-bold text-slate-800">{value}</p>
+            { label: 'Produccion', value: module.production || '0', icon: BarChart3 },
+            { label: 'Monitoreo', value: `${module.flockSize || '0'} animales`, icon: Activity },
+            { label: 'Alertas IA', value: module.alerts || 0, icon: AlertTriangle },
+          ].map(({ label, value, icon: Icon }) => (
+            <div key={label} className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+              <Icon size={17} className="mb-3 text-emerald-600" />
+              <p className="text-xs font-bold uppercase text-slate-400">{label}</p>
+              <p className="mt-1 text-sm font-black text-slate-900">{value}</p>
             </div>
           ))}
         </div>
 
-        <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
-          <p className="text-xs text-blue-700 mb-2 font-bold uppercase tracking-wide">Notas clínicas</p>
-          <p className="text-sm text-slate-700 leading-relaxed font-medium">{pet.notes}</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-slate-100 bg-white p-4">
+            <p className="text-xs font-black uppercase text-slate-400">Detalles del módulo</p>
+            <p className="mt-2 text-sm font-medium leading-relaxed text-slate-700">
+              Edad: {module.age || 'N/A'} · Peso: {module.weight || 'N/A'}
+            </p>
+          </div>
+          <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
+            <p className="text-xs font-black uppercase text-emerald-700">IA pecuaria</p>
+            <p className="mt-2 text-sm font-medium leading-relaxed text-slate-700">{module.notes}</p>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+            <Gauge size={17} className="mb-3 text-emerald-600" />
+            <p className="text-xs font-black uppercase text-slate-400">Rendimiento</p>
+            <p className="mt-1 text-sm font-black text-slate-900">{module.efficiency}</p>
+          </div>
+          <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+            <Leaf size={17} className="mb-3 text-emerald-600" />
+            <p className="text-xs font-black uppercase text-slate-400">Alimentacion sugerida</p>
+            <p className="mt-1 text-sm font-black text-slate-900">
+              {isLayerModule ? '110-120 g/ave/dia' : 'Segun peso y edad'}
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+            <ThermometerSun size={17} className="mb-3 text-amber-600" />
+            <p className="text-xs font-black uppercase text-slate-400">Riesgo actual</p>
+            <p className="mt-1 text-sm font-black text-slate-900">
+              {module.alerts > 0 ? 'Requiere vigilancia' : 'Estable'}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-3 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-xl border border-amber-100 bg-amber-50 p-4">
+            <div className="mb-3 flex items-center gap-2 text-amber-700">
+              <Sparkles size={16} />
+              <p className="text-xs font-black uppercase">Plan sugerido por IA</p>
+            </div>
+            <div className="space-y-2">
+              {recommendations.map((item) => (
+                <div key={item} className="flex gap-2 text-sm font-medium leading-relaxed text-slate-700">
+                  <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-emerald-100 bg-white p-4">
+            <div className="mb-3 flex items-center gap-2 text-emerald-700">
+              <DollarSign size={16} />
+              <p className="text-xs font-black uppercase">Impacto economico</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-lg bg-slate-50 p-3">
+                <p className="text-[11px] font-bold uppercase text-slate-400">Ingreso mes</p>
+                <p className="text-sm font-black text-slate-900">S/ {financialProjection.monthlyIncome}</p>
+              </div>
+              <div className="rounded-lg bg-slate-50 p-3">
+                <p className="text-[11px] font-bold uppercase text-slate-400">Utilidad</p>
+                <p className="text-sm font-black text-slate-900">S/ {financialProjection.netProfit}</p>
+              </div>
+              <div className="rounded-lg bg-slate-50 p-3">
+                <p className="text-[11px] font-bold uppercase text-slate-400">Margen</p>
+                <p className="text-sm font-black text-slate-900">{financialProjection.margin}%</p>
+              </div>
+              <div className="rounded-lg bg-slate-50 p-3">
+                <p className="text-[11px] font-bold uppercase text-slate-400">Precio huevo</p>
+                <p className="text-sm font-black text-slate-900">S/ {financialProjection.eggPrice}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-xl border border-slate-100 bg-slate-950 p-4 text-white">
+          <div className="mb-3 flex items-center gap-2">
+            <CalendarDays size={16} className="text-emerald-300" />
+            <p className="text-xs font-black uppercase text-slate-300">Proximas acciones</p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {['Confirmar produccion de hoy', 'Subir foto del nido', 'Revisar agua y temperatura'].map((task) => (
+              <div key={task} className="rounded-lg border border-white/10 bg-white/[0.06] p-3 text-xs font-bold text-slate-200">
+                {task}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -140,84 +253,258 @@ function PetDetailModal({ pet, onClose }) {
 }
 
 function NewAnimalModal({ onClose }) {
-  const [formData, setFormData] = useState({
-    name: '', species: '', breed: '', age: '', weight: '', ownerName: '', ownerDni: '',
-  });
   const [submitted, setSubmitted] = useState(false);
+  const [registrationMode, setRegistrationMode] = useState('batch');
+  const [individuals, setIndividuals] = useState([
+    { id: 1, code: 'AVE-001', name: '', note: '' },
+  ]);
+
+  const [selectedSpecies, setSelectedSpecies] = useState('');
+
+  const isMeatBird = selectedSpecies === 'Pollos de Engorde';
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const fd = new FormData(e.target);
+    
+    const newModule = {
+      name: fd.get('name'),
+      species: fd.get('species'),
+      flockSize: Number(fd.get('flockSize') || 0),
+      productionGoal: fd.get('productionGoal'),
+      location: fd.get('location'),
+      notes: fd.get('notes'),
+      emoji: isMeatBird ? '🍗' : '🐔',
+      code: 'MOD',
+      status: 'Activo',
+      statusType: 'success',
+      efficiency: '0%',
+      alerts: 0
+    };
+
+    addLivestockModule(newModule);
     setSubmitted(true);
-    setTimeout(onClose, 1800);
+    setTimeout(onClose, 1600);
+  };
+
+  const updateIndividual = (id, field, value) => {
+    setIndividuals((prev) => prev.map((item) => (item.id === id ? { ...item, [field]: value } : item)));
+  };
+
+  const addIndividual = () => {
+    setIndividuals((prev) => [
+      ...prev,
+      {
+        id: prev.length + 1,
+        code: `AVE-${String(prev.length + 1).padStart(3, '0')}`,
+        name: '',
+        note: '',
+      },
+    ]);
+  };
+
+  const removeIndividual = (id) => {
+    setIndividuals((prev) => (prev.length === 1 ? prev : prev.filter((item) => item.id !== id)));
   };
 
   return (
     <div
-      className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-60 flex items-end justify-center bg-slate-950/60 p-0 backdrop-blur-sm animate-fade-in sm:items-center sm:p-4"
       onClick={onClose}
     >
       <div
         id="new-animal-modal"
-        className="glass-card w-full max-w-lg p-6 animate-slide-up max-h-[90vh] overflow-y-auto bg-white"
+        className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl border border-slate-200 bg-white p-4 shadow-2xl animate-slide-up sm:max-h-[90vh] sm:rounded-2xl sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-slate-900">Registrar Nuevo Animal</h2>
-          <button onClick={onClose} className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all">
+        <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-slate-200 sm:hidden" />
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-xl font-black text-slate-900">Nuevo modulo pecuario</h2>
+          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-700">
             <X size={18} />
           </button>
         </div>
 
         {submitted ? (
-          <div className="text-center py-8 animate-fade-in">
-            <div className="text-5xl mb-4">✅</div>
-            <p className="text-lg font-bold text-emerald-600">¡Animal registrado!</p>
-            <p className="text-sm text-slate-500 mt-1">El perfil ha sido guardado correctamente.</p>
+          <div className="py-8 text-center animate-fade-in">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+              <Sparkles size={26} />
+            </div>
+            <p className="text-lg font-black text-emerald-700">Modulo preparado</p>
+            <p className="mt-1 text-sm font-medium text-slate-500">
+              {registrationMode === 'batch'
+                ? 'El lote queda listo para monitoreo por cantidad.'
+                : `${individuals.length} registro${individuals.length > 1 ? 's' : ''} individual${individuals.length > 1 ? 'es' : ''} listo${individuals.length > 1 ? 's' : ''} para seguimiento.`}
+            </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-2">
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  {
+                    id: 'batch',
+                    label: 'Por cantidad',
+                    description: 'Ideal para lotes o galpones',
+                    icon: UsersRound,
+                  },
+                  {
+                    id: 'individual',
+                    label: 'Uno por uno',
+                    description: 'Seguimiento animal individual',
+                    icon: UserRoundPlus,
+                  },
+                ].map((mode) => {
+                  const Icon = mode.icon;
+                  const isActive = registrationMode === mode.id;
+                  return (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => setRegistrationMode(mode.id)}
+                      className={clsx(
+                        'rounded-xl border p-3 text-left transition-all duration-200',
+                        isActive
+                           ? 'border-emerald-300 bg-white text-emerald-800 shadow-sm'
+                          : 'border-transparent bg-transparent text-slate-600 hover:bg-white',
+                      )}
+                    >
+                      <div className="mb-2 flex items-center gap-2">
+                        <Icon size={16} className={isActive ? 'text-emerald-600' : 'text-slate-400'} />
+                        <span className="text-sm font-black">{mode.label}</span>
+                      </div>
+                      <p className="text-[11px] font-medium leading-snug text-slate-500">{mode.description}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="text-xs text-slate-700 mb-1.5 block font-bold">Nombre *</label>
-                <input id="new-pet-name" required className="input-field" placeholder="Ej: Luna" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                <label className="mb-1.5 block text-xs font-bold text-slate-700">Nombre del modulo *</label>
+                <input name="name" required className="input-field" placeholder={registrationMode === 'batch' ? 'Ej: Ponedoras lote B' : 'Ej: Ponedoras reproductoras'} />
               </div>
               <div>
-                <label className="text-xs text-slate-700 mb-1.5 block font-bold">Especie *</label>
-                <select id="new-pet-species" required className="input-field" value={formData.species} onChange={(e) => setFormData({ ...formData, species: e.target.value })}>
+                <label className="mb-1.5 block text-xs font-bold text-slate-700">Tipo *</label>
+                <select 
+                  name="species" 
+                  required 
+                  className="input-field"
+                  value={selectedSpecies}
+                  onChange={(e) => setSelectedSpecies(e.target.value)}
+                >
                   <option value="">Seleccionar...</option>
-                  {['Perro', 'Gato', 'Vaca', 'Alpaca', 'Caballo', 'Cerdo', 'Oveja', 'Pez', 'Ave', 'Otro'].map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
+                  <option>Gallinas Ponedoras</option>
+                  <option>Pollos de Engorde</option>
+                  <option>Codornices</option>
+                  <option>Patos</option>
+                  <option>Otra especie</option>
                 </select>
               </div>
-              <div>
-                <label className="text-xs text-slate-700 mb-1.5 block font-bold">Raza</label>
-                <input id="new-pet-breed" className="input-field" placeholder="Ej: Golden Retriever" value={formData.breed} onChange={(e) => setFormData({ ...formData, breed: e.target.value })} />
-              </div>
-              <div>
-                <label className="text-xs text-slate-700 mb-1.5 block font-bold">Edad</label>
-                <input id="new-pet-age" className="input-field" placeholder="Ej: 3 años" value={formData.age} onChange={(e) => setFormData({ ...formData, age: e.target.value })} />
-              </div>
-              <div>
-                <label className="text-xs text-slate-700 mb-1.5 block font-bold">Peso</label>
-                <input id="new-pet-weight" className="input-field" placeholder="Ej: 28 kg" value={formData.weight} onChange={(e) => setFormData({ ...formData, weight: e.target.value })} />
-              </div>
-              <div>
-                <label className="text-xs text-slate-700 mb-1.5 block font-bold">Nombre del Dueño *</label>
-                <input id="new-pet-owner" required className="input-field" placeholder="Nombre completo" value={formData.ownerName} onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })} />
-              </div>
+              {registrationMode === 'batch' ? (
+                <>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold text-slate-700">Cantidad *</label>
+                    <input name="flockSize" required className="input-field" inputMode="numeric" placeholder="Ej: 120" />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold text-slate-700">
+                      {isMeatBird ? 'Objetivo de Peso' : 'Objetivo productivo'}
+                    </label>
+                    <input 
+                      name="productionGoal" 
+                      className="input-field" 
+                      placeholder={isMeatBird ? 'Ej: 2.8 kg / 45 dias' : 'Ej: 40 huevos/dia'} 
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold text-slate-700">Ubicacion</label>
+                    <input name="location" className="input-field" placeholder="Ej: Jaula A / corral 1" />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-bold text-slate-700">Objetivo individual</label>
+                    <input name="individualGoal" className="input-field" placeholder="Ej: postura, peso, sanidad" />
+                  </div>
+                </>
+              )}
             </div>
+
+            {registrationMode === 'individual' && (
+              <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-black text-slate-900">Animales individuales</p>
+                    <p className="text-xs font-medium text-slate-500">Agrega codigo, nombre o nota de identificacion.</p>
+                  </div>
+                  <button type="button" onClick={addIndividual} className="btn-secondary px-3 py-2 text-xs">
+                    <Plus size={13} />
+                    Agregar
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {individuals.map((item, index) => (
+                    <div key={item.id} className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="text-xs font-black uppercase text-slate-500">Animal {index + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeIndividual(item.id)}
+                          disabled={individuals.length === 1}
+                          className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-white hover:text-red-600 disabled:opacity-40"
+                          aria-label="Eliminar animal"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                        <input
+                          className="input-field py-2.5 text-sm"
+                          value={item.code}
+                          onChange={(e) => updateIndividual(item.id, 'code', e.target.value)}
+                          placeholder="Codigo"
+                        />
+                        <input
+                          className="input-field py-2.5 text-sm"
+                          value={item.name}
+                          onChange={(e) => updateIndividual(item.id, 'name', e.target.value)}
+                          placeholder="Nombre opcional"
+                        />
+                        <input
+                          className="input-field py-2.5 text-sm"
+                          value={item.note}
+                          onChange={(e) => updateIndividual(item.id, 'note', e.target.value)}
+                          placeholder="Nota"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div>
-              <label className="text-xs text-slate-700 mb-1.5 block font-bold">DNI del Dueño</label>
-              <input id="new-pet-dni" className="input-field" placeholder="Ej: 45123678" value={formData.ownerDni} onChange={(e) => setFormData({ ...formData, ownerDni: e.target.value })} />
+              <label className="mb-1.5 block text-xs font-bold text-slate-700">Notas para IA</label>
+              <textarea
+                name="notes"
+                className="input-field min-h-24 resize-none"
+                placeholder={
+                  registrationMode === 'batch'
+                    ? 'Rutina, alimento, ubicacion del galpon...'
+                    : 'Criterios de identificacion, revisiones o comportamiento...'
+                }
+              />
             </div>
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row">
               <button type="button" onClick={onClose} className="btn-secondary flex-1 justify-center">
                 Cancelar
               </button>
               <button id="submit-new-pet" type="submit" className="btn-primary flex-1 justify-center">
                 <Plus size={14} />
-                Registrar Animal
+                Crear modulo
               </button>
             </div>
           </form>
@@ -228,98 +515,91 @@ function NewAnimalModal({ onClose }) {
 }
 
 export default function PetLibrary() {
+  const [modules, setModules] = useState([]);
   const [search, setSearch] = useState('');
   const [speciesFilter, setSpeciesFilter] = useState('Todos');
-  const [selectedPet, setSelectedPet] = useState(null);
+  const [selectedModule, setSelectedModule] = useState(null);
   const [showNewModal, setShowNewModal] = useState(false);
 
-  const filtered = mockPets.filter((pet) => {
-    const matchesSearch =
-      !search ||
-      pet.name.toLowerCase().includes(search.toLowerCase()) ||
-      pet.breed.toLowerCase().includes(search.toLowerCase()) ||
-      pet.ownerDni.includes(search) ||
-      pet.ownerName.toLowerCase().includes(search.toLowerCase());
-    const matchesSpecies = speciesFilter === 'Todos' || pet.species === speciesFilter;
-    return matchesSearch && matchesSpecies;
-  });
+  useEffect(() => {
+    const loadModules = () => setModules(getLivestockModules());
+    loadModules();
+    window.addEventListener(STORAGE_EVENTS.modules, loadModules);
+    return () => window.removeEventListener(STORAGE_EVENTS.modules, loadModules);
+  }, []);
+
+  const filtered = useMemo(() => {
+    return modules.filter((module) => {
+      const haystack = `${module.name} ${module.species} ${module.breed} ${module.ownerName}`.toLowerCase();
+      const matchesSearch = !search || haystack.includes(search.toLowerCase());
+      const matchesSpecies = speciesFilter === 'Todos' || module.species === speciesFilter;
+      return matchesSearch && matchesSpecies;
+    });
+  }, [modules, search, speciesFilter]);
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Mis Animales</h2>
-          <p className="text-slate-500 mt-1 font-medium">
-            {filtered.length} de {mockPets.length} animales registrados
+          <h2 className="text-xl font-black text-slate-900 sm:text-2xl">Biblioteca Pecuaria IA</h2>
+          <p className="mt-1 font-medium text-slate-500">
+            {filtered.length} de {modules.length} modulos con produccion, historial y monitoreo.
           </p>
         </div>
-        <button
-          id="btn-new-animal"
-          onClick={() => setShowNewModal(true)}
-          className="btn-primary"
-        >
+        <button id="btn-new-animal" onClick={() => setShowNewModal(true)} className="btn-primary w-full justify-center sm:w-auto">
           <Plus size={16} />
-          Nuevo Animal
+          Nuevo modulo
         </button>
       </div>
 
-      {/* Search + filter bar */}
-      <div className="glass-card p-4 flex flex-col sm:flex-row gap-3 bg-white">
-        <div className="relative flex-1">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            id="pet-search"
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nombre, raza o DNI del dueño..."
-            className="input-field pl-9"
-          />
-        </div>
-        <div className="relative">
-          <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <select
-            id="species-filter"
-            value={speciesFilter}
-            onChange={(e) => setSpeciesFilter(e.target.value)}
-            className="input-field pl-8 pr-8 appearance-none w-full sm:w-44 cursor-pointer font-medium text-slate-700"
-          >
-            {speciesOptions.map((s) => (
-               <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              id="pet-search"
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar especie, lote, raza o modulo..."
+              className="input-field pl-9"
+            />
+          </div>
+          <div className="relative">
+            <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <select
+              id="species-filter"
+              value={speciesFilter}
+              onChange={(e) => setSpeciesFilter(e.target.value)}
+              className="input-field w-full cursor-pointer appearance-none pl-8 pr-8 font-medium text-slate-700 sm:w-52"
+            >
+              {speciesOptions.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+            <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          </div>
         </div>
       </div>
 
-      {/* Grid */}
       {filtered.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map((pet) => (
-            <PetCard key={pet.id} pet={pet} onViewDetail={setSelectedPet} />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((module) => (
+            <ModuleCard key={module.id} module={module} onViewDetail={setSelectedModule} />
           ))}
         </div>
       ) : (
-        <div className="glass-card p-12 text-center bg-white border border-slate-200 border-dashed">
-          <p className="text-5xl mb-4 opacity-50">🔍</p>
-          <p className="text-slate-900 font-bold text-lg">Sin resultados</p>
-          <p className="text-slate-500 text-sm mt-1 font-medium">
-            No se encontraron animales con "{search}"
-          </p>
-          <button onClick={() => { setSearch(''); setSpeciesFilter('Todos'); }} className="btn-secondary mt-4 mx-auto">
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center">
+          <p className="text-lg font-black text-slate-900">Sin resultados</p>
+          <p className="mt-1 text-sm font-medium text-slate-500">No se encontraron modulos con "{search}".</p>
+          <button onClick={() => { setSearch(''); setSpeciesFilter('Todos'); }} className="btn-secondary mx-auto mt-4">
             Limpiar filtros
           </button>
         </div>
       )}
 
-      {/* Modals */}
-      {selectedPet && (
-        <PetDetailModal pet={selectedPet} onClose={() => setSelectedPet(null)} />
-      )}
-      {showNewModal && (
-        <NewAnimalModal onClose={() => setShowNewModal(false)} />
-      )}
+      {selectedModule && <ModuleDetailModal module={selectedModule} onClose={() => setSelectedModule(null)} />}
+      {showNewModal && <NewAnimalModal onClose={() => setShowNewModal(false)} />}
     </div>
   );
 }

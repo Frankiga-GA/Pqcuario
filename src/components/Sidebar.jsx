@@ -1,25 +1,34 @@
 import { useState } from 'react';
 import {
-  LayoutDashboard,
-  PawPrint,
   Bot,
-  Newspaper,
-  Settings,
+  Calculator,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
   HeartPulse,
+  History,
+  LayoutDashboard,
+  LogOut,
   Menu,
+  Newspaper,
+  Settings,
+  Warehouse,
   X,
 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { supabase } from '../lib/supabaseClient';
 
 const navItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, description: 'Resumen general' },
-  { id: 'pets', label: 'Mis Animales', icon: PawPrint, description: 'Gestión de perfiles' },
-  { id: 'vetcoach', label: 'VetCoach IA', icon: Bot, description: 'Consultas inteligentes' },
-  { id: 'market', label: 'Mercado & Guía', icon: Newspaper, description: 'Noticias y precios' },
-  { id: 'settings', label: 'Configuración', icon: Settings, description: 'Perfil y ajustes' },
+  { id: 'dashboard', label: 'Command Center', icon: LayoutDashboard, description: 'Produccion y alertas' },
+  { id: 'records', label: 'Registros', icon: ClipboardList, description: 'Huevos, alimento y tareas' },
+  { id: 'calculator', label: 'Calculadora', icon: Calculator, description: 'Costos y utilidad' },
+  { id: 'pets', label: 'Biblioteca Pecuaria', icon: Warehouse, description: 'Modulos productivos' },
+  { id: 'history', label: 'Historial', icon: History, description: 'Registros guardados' },
+  { id: 'vetcoach', label: 'IAVet IA', icon: Bot, description: 'Voz, texto e imagen' },
+  { id: 'market', label: 'Mercado IA', icon: Newspaper, description: 'Precios y margen' },
+  { id: 'settings', label: 'Configuracion', icon: Settings, description: 'Perfil y ajustes' },
 ];
+
 
 export default function Sidebar({ activeTab, onTabChange }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -32,86 +41,73 @@ export default function Sidebar({ activeTab, onTabChange }) {
 
   return (
     <>
-      {/* Mobile hamburger button */}
       <button
         id="sidebar-mobile-toggle"
         onClick={() => setMobileOpen(true)}
-        className="fixed top-4 left-4 z-50 p-2.5 rounded-xl bg-white border border-slate-200 
-                   shadow-sm text-slate-700 hover:bg-slate-50 transition-all duration-200 
-                   lg:hidden"
-        aria-label="Abrir menú"
+        className="fixed left-4 top-4 z-50 rounded-xl border border-[#cfe1d3] bg-white p-2.5 text-[#1f3d2b] shadow-sm transition-all duration-200 hover:bg-[#f4faf2] lg:hidden"
+        aria-label="Abrir menu"
       >
         <Menu size={20} />
       </button>
 
-      {/* Mobile overlay backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm lg:hidden animate-fade-in"
+          className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-sm lg:hidden animate-fade-in"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
-      {/* Sidebar panel */}
       <aside
         className={clsx(
-          'fixed top-0 left-0 h-full z-50 flex flex-col transition-all duration-300',
-          'bg-white border-r border-slate-200 shadow-sm',
-          // Desktop width toggle
+          'fixed left-0 top-0 z-50 flex h-full flex-col border-r border-[#d6a84f]/20 bg-[linear-gradient(180deg,#12372a_0%,#1f4f35_55%,#243b2c_100%)] shadow-xl transition-all duration-300',
           collapsed ? 'w-20' : 'w-64',
-          // Mobile: slide in/out
           'lg:translate-x-0',
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
         )}
       >
-        {/* Logo area */}
-        <div className="flex items-center justify-between px-4 py-5 border-b border-slate-100">
+        <div className="flex items-center justify-between border-b border-white/10 px-4 py-5">
           {!collapsed && (
             <div className="flex items-center gap-3 animate-fade-in">
-              <div className="w-9 h-9 rounded-xl bg-emerald-600 
-                              flex items-center justify-center shadow-md shadow-emerald-600/20 flex-shrink-0">
-                <HeartPulse size={18} className="text-white" />
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border-2 border-[#f2d58a]/40 bg-[#12372a] shadow-lg shadow-[#d6a84f]/10">
+                <Bot size={22} className="text-[#f2d58a]" />
               </div>
               <div>
-                <h1 className="text-base font-bold text-slate-900 leading-tight">PetGuide</h1>
-                <span className="text-xs text-emerald-600 font-bold uppercase tracking-wider">Agro IA</span>
+                <h1 className="text-sm font-black leading-tight text-white tracking-tight">AGROPECUARIO</h1>
+                <div className="flex items-center gap-1.5">
+                  <div className="h-1 w-1 rounded-full bg-[#f2d58a]" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#f2d58a]">IA</span>
+                </div>
               </div>
             </div>
           )}
           {collapsed && (
-            <div className="w-9 h-9 rounded-xl bg-emerald-600 
-                            flex items-center justify-center shadow-md shadow-emerald-600/20 mx-auto">
-              <HeartPulse size={18} className="text-white" />
+            <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#f2d58a]/40 bg-[#12372a] shadow-lg shadow-[#d6a84f]/10">
+              <Bot size={20} className="text-[#f2d58a]" />
             </div>
           )}
 
-          {/* Desktop collapse button */}
           <button
             id="sidebar-collapse-toggle"
             onClick={() => setCollapsed(!collapsed)}
-            className="hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:text-slate-700 
-                       hover:bg-slate-100 transition-all duration-200"
+            className="hidden rounded-lg p-1.5 text-slate-400 transition-all duration-200 hover:bg-white/10 hover:text-white lg:flex"
             aria-label={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
           >
             {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           </button>
 
-          {/* Mobile close button */}
           <button
             onClick={() => setMobileOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 
-                       hover:bg-slate-100 transition-all duration-200"
-            aria-label="Cerrar menú"
+            className="rounded-lg p-1.5 text-slate-400 transition-all duration-200 hover:bg-white/10 hover:text-white lg:hidden"
+            aria-label="Cerrar menu"
           >
             <X size={16} />
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {!collapsed && (
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest px-3 mb-3">
-              Navegación
+            <p className="mb-3 px-3 text-xs font-bold uppercase tracking-widest text-slate-500">
+              Operacion
             </p>
           )}
           {navItems.map((item) => {
@@ -124,10 +120,10 @@ export default function Sidebar({ activeTab, onTabChange }) {
                 onClick={() => handleTabChange(item.id)}
                 title={collapsed ? item.label : ''}
                 className={clsx(
-                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group font-medium',
+                  'group flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 font-medium transition-all duration-200',
                   isActive
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-transparent',
+                    ? 'border-[#f2d58a]/30 bg-[#f2d58a]/12 text-white shadow-sm'
+                    : 'border-transparent text-[#b7cbbd] hover:bg-white/8 hover:text-white',
                   collapsed ? 'justify-center' : '',
                 )}
               >
@@ -135,45 +131,47 @@ export default function Sidebar({ activeTab, onTabChange }) {
                   size={20}
                   className={clsx(
                     'flex-shrink-0 transition-transform duration-200',
-                    isActive ? 'text-emerald-600' : 'text-slate-400 group-hover:text-slate-600',
+                    isActive ? 'text-[#f2d58a]' : 'text-[#91ad99] group-hover:text-[#dceade]',
                     !collapsed && 'group-hover:scale-110',
                   )}
                 />
                 {!collapsed && (
-                  <div className="flex flex-col items-start min-w-0 animate-fade-in text-left">
-                    <span className="text-sm font-semibold leading-tight truncate">{item.label}</span>
-                    <span className={clsx('text-xs leading-tight truncate mt-0.5', isActive ? 'text-emerald-600/80' : 'text-slate-400')}>
+                  <div className="flex min-w-0 flex-col items-start text-left animate-fade-in">
+                    <span className="truncate text-sm font-semibold leading-tight">{item.label}</span>
+                    <span className={clsx('mt-0.5 truncate text-xs leading-tight', isActive ? 'text-[#f2d58a]/80' : 'text-[#91ad99]')}>
                       {item.description}
                     </span>
                   </div>
                 )}
-                {isActive && !collapsed && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-                )}
+                {isActive && !collapsed && <div className="ml-auto h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#f2d58a]" />}
               </button>
             );
           })}
         </nav>
 
-        {/* Bottom user info */}
         {!collapsed && (
-          <div className="p-4 border-t border-slate-100 animate-fade-in bg-slate-50/50">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-sm">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-600 to-teal-700 
-                              flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+          <div className="border-t border-white/10 bg-white/[0.04] p-4 animate-fade-in">
+            <div className="flex items-center gap-3 rounded-xl border border-[#f2d58a]/15 bg-white/8 p-3 shadow-sm">
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#d6a84f] to-[#2f7d4b] text-sm font-bold text-white">
                 A
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-bold text-slate-900 truncate">Admin Granja</p>
-                <p className="text-xs text-slate-500 truncate font-medium">ProInnovate MVP</p>
+                <p className="truncate text-sm font-bold text-white">Admin Granja</p>
+                <p className="truncate text-xs font-medium text-[#b7cbbd]">IAVet MVP</p>
               </div>
             </div>
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className="mt-3 flex w-full items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/5 px-3 py-2 text-sm font-semibold text-red-200 transition-all hover:bg-red-500/10 hover:text-white"
+            >
+              <LogOut size={16} />
+              Cerrar Sesión
+            </button>
           </div>
         )}
       </aside>
 
-      {/* Spacer for fixed sidebar on desktop */}
-      <div className={clsx('hidden lg:block flex-shrink-0 transition-all duration-300', collapsed ? 'w-20' : 'w-64')} />
+      <div className={clsx('hidden flex-shrink-0 transition-all duration-300 lg:block', collapsed ? 'w-20' : 'w-64')} />
     </>
   );
 }

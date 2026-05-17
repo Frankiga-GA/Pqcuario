@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { ShieldCheck, Bot, HeartPulse, X, ArrowRight, Activity, Zap, Loader2, PlayCircle, BarChart3, TrendingUp, CheckCircle2 } from 'lucide-react';
-import { clsx } from 'clsx';
+import { ShieldCheck, Bot, HeartPulse, X, ArrowRight, Activity, Zap, Loader2, PlayCircle, BarChart3, TrendingUp, CheckCircle2, AlertCircle } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
 function FeatureCard({ icon: Icon, title, description }) {
   return (
@@ -14,20 +14,40 @@ function FeatureCard({ icon: Icon, title, description }) {
   );
 }
 
-export default function LandingPage({ onLogin }) {
+export default function LandingPage() {
   const [showLogin, setShowLogin] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   
-  const [email, setEmail] = useState('admin@petguide.pe');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleLogin = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
+    setError(null);
+
+    try {
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (error) throw error;
+        alert('Cuenta creada con éxito. Revisa tu correo para confirmar.');
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) throw error;
+      }
+    } catch (err) {
+      setError(err.message || 'Ocurrió un error inesperado');
+    } finally {
       setIsLoading(false);
-      onLogin();
-    }, 1200);
+    }
   };
 
   return (
@@ -45,10 +65,8 @@ export default function LandingPage({ onLogin }) {
             poster="https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2070&auto=format&fit=crop"
             className="absolute inset-0 w-full h-full object-cover"
           >
-            {/* Stock video placeholder (agriculture/fields) */}
             <source src="https://cdn.pixabay.com/video/2022/10/24/136224-764516982_large.mp4" type="video/mp4" />
           </video>
-          {/* Light overlay to ensure text readability */}
           <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px]"></div>
         </div>
 
@@ -64,14 +82,11 @@ export default function LandingPage({ onLogin }) {
             </div>
           </div>
           <div className="flex gap-4">
-            <button className="hidden sm:block text-sm font-semibold text-slate-700 hover:text-emerald-600 transition-colors px-4 py-2">
-              Soluciones
-            </button>
-            <button className="hidden sm:block text-sm font-semibold text-slate-700 hover:text-emerald-600 transition-colors px-4 py-2">
-              Mercados
-            </button>
             <button 
-              onClick={() => setShowLogin(true)}
+              onClick={() => {
+                setIsSignUp(false);
+                setShowLogin(true);
+              }}
               className="bg-slate-900 text-white hover:bg-slate-800 text-sm font-semibold px-6 py-2.5 rounded-lg transition-all shadow-lg hover:shadow-xl"
             >
               Iniciar Sesión
@@ -96,7 +111,10 @@ export default function LandingPage({ onLogin }) {
           
           <div className="flex flex-col sm:flex-row items-center gap-4 animate-slide-up w-full sm:w-auto" style={{ animationDelay: '0.3s' }}>
             <button 
-              onClick={() => setShowLogin(true)}
+              onClick={() => {
+                setIsSignUp(true);
+                setShowLogin(true);
+              }}
               className="bg-emerald-600 text-white hover:bg-emerald-700 font-bold text-lg px-8 py-3.5 rounded-xl w-full sm:w-auto flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/30 hover:-translate-y-0.5"
             >
               Comenzar gratis
@@ -159,7 +177,7 @@ export default function LandingPage({ onLogin }) {
         </div>
       </section>
 
-      {/* --- LOGIN MODAL --- */}
+      {/* --- AUTH MODAL --- */}
       {showLogin && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div 
@@ -179,11 +197,22 @@ export default function LandingPage({ onLogin }) {
               <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-4">
                 <HeartPulse size={32} className="text-emerald-600" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-2 tracking-tight">Bienvenido de vuelta</h3>
-              <p className="text-slate-500 text-sm">Ingresa a tu cuenta para continuar</p>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2 tracking-tight">
+                {isSignUp ? 'Crea tu cuenta' : 'Bienvenido de vuelta'}
+              </h3>
+              <p className="text-slate-500 text-sm">
+                {isSignUp ? 'Únete a la plataforma pecuaria líder' : 'Ingresa a tu cuenta para continuar'}
+              </p>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-5">
+            {error && (
+              <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-100 flex items-start gap-3 text-red-700 text-sm animate-shake">
+                <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                <p>{error}</p>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Correo Electrónico</label>
                 <input 
@@ -192,6 +221,7 @@ export default function LandingPage({ onLogin }) {
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
                   className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                  placeholder="ejemplo@correo.com"
                   required
                 />
               </div>
@@ -203,6 +233,7 @@ export default function LandingPage({ onLogin }) {
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
                   className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                  placeholder="••••••••"
                   required
                 />
               </div>
@@ -215,17 +246,26 @@ export default function LandingPage({ onLogin }) {
                 {isLoading ? (
                   <>
                     <Loader2 size={20} className="animate-spin" />
-                    Autenticando...
+                    {isSignUp ? 'Creando cuenta...' : 'Autenticando...'}
                   </>
                 ) : (
-                  'Ingresar a la Plataforma'
+                  isSignUp ? 'Crear Cuenta' : 'Ingresar a la Plataforma'
                 )}
               </button>
             </form>
             
-            <p className="text-center text-xs text-slate-500 mt-6 bg-slate-50 p-3 rounded-lg">
-              Demostración: Usa las credenciales predeterminadas.
-            </p>
+            <div className="mt-6 text-center">
+              <button 
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setError(null);
+                }}
+                disabled={isLoading}
+                className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+              >
+                {isSignUp ? '¿Ya tienes una cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate aquí'}
+              </button>
+            </div>
           </div>
         </div>
       )}

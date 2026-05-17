@@ -1,260 +1,477 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Activity,
-  Syringe,
-  MessageSquare,
-  Heart,
-  TrendingUp,
   ArrowRight,
   Bell,
+  Camera,
+  ClipboardList,
+  DollarSign,
+  Droplets,
+  Mic,
+  Thermometer,
+  TrendingDown,
+  TrendingUp,
+  WifiOff,
   Zap,
 } from 'lucide-react';
-import { mockPets, recentActivity } from '../data/mockData';
 import { clsx } from 'clsx';
+import { getAgroContextForAI, getFarmTasks, getFeedRecords } from '../lib/storage';
 
-const metrics = [
-  {
-    id: 'total-animals',
-    label: 'Animales Activos',
-    value: '6',
-    sub: '+1 este mes',
-    icon: Heart,
-    color: 'emerald',
-    gradient: 'from-emerald-50 to-white',
-    border: 'border-emerald-100',
-    iconBg: 'bg-emerald-100',
-    iconColor: 'text-emerald-600',
-    trend: '+16.7%',
-    trendUp: true,
-  },
-  {
-    id: 'upcoming-vaccines',
-    label: 'Próximas Vacunas',
-    value: '2',
-    sub: 'Próximos 30 días',
-    icon: Syringe,
-    color: 'amber',
-    gradient: 'from-amber-50 to-white',
-    border: 'border-amber-100',
-    iconBg: 'bg-amber-100',
-    iconColor: 'text-amber-600',
-    trend: '!Urgente',
-    trendUp: false,
-  },
-  {
-    id: 'ai-queries',
-    label: 'Consultas IA',
-    value: '24',
-    sub: 'Este mes',
-    icon: MessageSquare,
-    color: 'blue',
-    gradient: 'from-blue-50 to-white',
-    border: 'border-blue-100',
-    iconBg: 'bg-blue-100',
-    iconColor: 'text-blue-600',
-    trend: '+40%',
-    trendUp: true,
-  },
-  {
-    id: 'wellbeing-score',
-    label: 'Bienestar General',
-    value: '82%',
-    sub: '5 de 6 saludables',
-    icon: Activity,
-    color: 'purple',
-    gradient: 'from-purple-50 to-white',
-    border: 'border-purple-100',
-    iconBg: 'bg-purple-100',
-    iconColor: 'text-purple-600',
-    trend: '+5%',
-    trendUp: true,
-  },
-];
-
-const activityColorMap = {
-  emerald: 'bg-emerald-50 border-emerald-100 text-emerald-600',
-  amber: 'bg-amber-50 border-amber-100 text-amber-600',
-  blue: 'bg-blue-50 border-blue-100 text-blue-600',
-  purple: 'bg-purple-50 border-purple-100 text-purple-600',
-  red: 'bg-red-50 border-red-100 text-red-600',
+const severityStyles = {
+  high: 'bg-[#5b2525]/55 border-red-300/30 text-red-50',
+  medium: 'bg-[#684f1d]/45 border-[#f2d58a]/35 text-amber-50',
+  info: 'bg-[#1f5b3b]/55 border-[#9bc5a8]/35 text-emerald-50',
 };
 
-export default function Dashboard({ onTabChange }) {
-  const [hoveredCard, setHoveredCard] = useState(null);
+const activityColorMap = {
+  emerald: 'bg-emerald-400/10 border-emerald-400/20 text-emerald-200',
+  amber: 'bg-amber-400/10 border-amber-400/20 text-amber-200',
+  blue: 'bg-sky-400/10 border-sky-400/20 text-sky-200',
+  purple: 'bg-violet-400/10 border-violet-400/20 text-violet-200',
+  red: 'bg-red-400/10 border-red-400/20 text-red-200',
+};
 
-  const upcomingVaccines = mockPets
-    .filter((p) => p.nextVaccine !== 'N/A')
-    .sort((a, b) => new Date(a.nextVaccine) - new Date(b.nextVaccine))
-    .slice(0, 3);
+function MiniTrendChart({ trend }) {
+  const max = Math.max(1, ...trend.map((item) => Math.max(item.eggs, item.expected)));
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Bienvenido de vuelta 👋</h2>
-          <p className="text-slate-500 mt-1">
-            Hoy es{' '}
-            <span className="text-slate-700 font-bold">
-              {new Date().toLocaleDateString('es-PE', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </span>
-          </p>
-        </div>
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 shadow-sm">
-          <Bell size={15} />
-          <span className="text-sm font-bold">2 alertas pendientes</span>
-        </div>
-      </div>
+    <div className="h-36 flex items-end gap-2">
+      {trend.map((item) => {
+        const height = Math.max(8, (item.eggs / max) * 100);
+        const expectedHeight = Math.max(8, (item.expected / max) * 100);
 
-      {/* Metrics grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {metrics.map((metric) => {
-          const Icon = metric.icon;
-          const isHovered = hoveredCard === metric.id;
-          return (
-            <div
-              key={metric.id}
-              id={`metric-${metric.id}`}
-              onMouseEnter={() => setHoveredCard(metric.id)}
-              onMouseLeave={() => setHoveredCard(null)}
-              className={clsx(
-                'glass-card p-5 cursor-default transition-all duration-300',
-                `bg-gradient-to-br ${metric.gradient} border ${metric.border}`,
-                isHovered ? 'scale-[1.02] shadow-md border-opacity-100' : 'scale-100 border-opacity-60',
-              )}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className={clsx('p-2.5 rounded-xl', metric.iconBg)}>
-                  <Icon size={20} className={metric.iconColor} />
-                </div>
-                <span
-                  className={clsx(
-                    'text-xs font-bold px-2 py-1 rounded-full',
-                    metric.trendUp
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-red-100 text-red-700',
-                  )}
-                >
-                  {metric.trendUp ? <TrendingUp size={10} className="inline mr-1" /> : null}
-                  {metric.trend}
-                </span>
-              </div>
-              <div className="text-3xl font-black text-slate-900 mb-1">{metric.value}</div>
-              <div className="text-sm font-bold text-slate-700">{metric.label}</div>
-              <div className="text-xs text-slate-500 mt-0.5 font-medium">{metric.sub}</div>
+        const isToday = item.day === 'Hoy';
+        return (
+          <div key={item.day} className="flex-1 h-full flex flex-col items-center justify-end gap-2">
+            <div className="relative w-full h-28 flex items-end justify-center">
+              <div
+                className="absolute bottom-0 w-1.5 rounded-full bg-amber-300/35"
+                style={{ height: `${expectedHeight}%` }}
+              />
+              <div
+                className={clsx(
+                  'w-7 rounded-t-lg transition-all duration-500',
+                  isToday ? 'bg-amber-300 shadow-lg shadow-amber-300/20' : 'bg-emerald-400',
+                )}
+                style={{ height: `${height}%` }}
+                title={`${item.eggs} huevos`}
+              />
             </div>
-          );
-        })}
-      </div>
+            <span className={clsx('text-[11px] font-bold', isToday ? 'text-amber-200' : 'text-slate-400')}>
+              {item.day}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
-      {/* Main content: Activity + Upcoming vaccines */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activity */}
-        <div className="lg:col-span-2 glass-card p-5">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="section-title">Actividad Reciente</h3>
-            <span className="badge badge-info">En vivo</span>
+export default function Dashboard({ onTabChange }) {
+  const [voiceListening, setVoiceListening] = useState(false);
+  const context = getAgroContextForAI();
+  const feedRecords = getFeedRecords();
+  const tasks = getFarmTasks();
+  const latestFeed = feedRecords.at(-1);
+  const pendingTasks = tasks.filter((task) => task.status !== 'done');
+  const trend = context.production.slice(-7).map((record, index, arr) => ({
+    day: index === arr.length - 1 ? 'Hoy' : new Date(`${record.date}T00:00:00`).toLocaleDateString('es-PE', { weekday: 'short' }).replace('.', ''),
+    eggs: Number(record.eggs || 0),
+    expected: Math.max(1, Math.round(context.previousAverage || Number(record.eggs || 0))),
+  }));
+  const chartTrend = trend.length ? trend : [{ day: 'Hoy', eggs: 0, expected: 1 }];
+
+  const aiAlerts = useMemo(() => {
+    const alerts = [];
+    if (context.production.length === 0) {
+      alerts.push({
+        id: 'no-production',
+        title: 'Registra tu primera produccion',
+        detail: 'Aun no hay huevos registrados para analizar tendencia, postura o merma.',
+        severity: 'info',
+        recommendation: 'Ve a Registros y guarda la produccion del dia para activar alertas reales.',
+      });
+    }
+    if (context.dropPercent >= 10) {
+      alerts.push({
+        id: 'drop',
+        title: 'Baja de produccion detectada',
+        detail: `La produccion bajo ${context.dropPercent.toFixed(1)}% frente al promedio reciente.`,
+        severity: 'high',
+        recommendation: 'Revisar agua, alimento, temperatura, luz y estres del lote.',
+      });
+    }
+    if (context.damagedRate >= 5) {
+      alerts.push({
+        id: 'damage',
+        title: 'Merma elevada',
+        detail: `La merma actual es ${context.damagedRate.toFixed(1)}% de los huevos registrados.`,
+        severity: 'medium',
+        recommendation: 'Revisar nidos, manipulacion y traslado hacia almacenamiento.',
+      });
+    }
+    if (pendingTasks.length > 0) {
+      alerts.push({
+        id: 'tasks',
+        title: 'Tareas pendientes de rutina',
+        detail: `Hay ${pendingTasks.length} tarea${pendingTasks.length === 1 ? '' : 's'} pendiente${pendingTasks.length === 1 ? '' : 's'} para completar.`,
+        severity: 'info',
+        recommendation: 'Completa primero agua, alimento, limpieza y confirmacion de produccion.',
+      });
+    }
+    if (context.modules.length === 0) {
+      alerts.push({
+        id: 'no-modules',
+        title: 'Sin modulos pecuarios registrados',
+        detail: 'Aun no hay lotes o especies registrados en la biblioteca pecuaria.',
+        severity: 'info',
+        recommendation: 'Crea un modulo con cantidad de aves para que la IA calcule indicadores por animal.',
+      });
+    }
+    return alerts.slice(0, 4);
+  }, [context, pendingTasks.length]);
+
+  const quickHistory = useMemo(() => {
+    const items = [];
+    if (context.latest) {
+      items.push({
+        id: 'production',
+        label: 'Produccion',
+        value: `${context.latest.eggs} huevos`,
+        time: context.latest.date,
+        status: `${context.latest.damaged || 0} no vendibles`,
+      });
+    }
+    if (latestFeed) {
+      items.push({
+        id: 'feed',
+        label: 'Alimento',
+        value: `${Number(latestFeed.kg || 0).toFixed(1)} kg`,
+        time: latestFeed.date,
+        status: `S/ ${Number(latestFeed.costPerKg || 0).toFixed(2)} por kg`,
+      });
+    }
+    pendingTasks.slice(0, 2).forEach((task) => {
+      items.push({
+        id: `task-${task.id}`,
+        label: 'Tarea',
+        value: task.title,
+        time: task.priority,
+        status: task.source,
+      });
+    });
+    return items;
+  }, [context.latest, latestFeed, pendingTasks]);
+
+  const recentActivity = quickHistory.map((item, index) => ({
+    id: item.id,
+    icon: item.label.slice(0, 2).toUpperCase(),
+    text: `${item.label}: ${item.value}`,
+    time: item.time,
+    color: ['emerald', 'amber', 'blue', 'purple'][index % 4],
+  }));
+
+  const metricCards = useMemo(
+    () => [
+      {
+        label: 'Produccion diaria',
+        value: `${context.latestEggs}`,
+        sub: `Promedio reciente: ${context.previousAverage.toFixed(1)} huevos`,
+        icon: ClipboardList,
+        trend: `${context.dropPercent.toFixed(1)}%`,
+        tone: 'amber',
+      },
+      {
+        label: 'Lote monitoreado',
+        value: `${context.totalAnimals}`,
+        sub: `${context.moduleCount} modulo${context.moduleCount === 1 ? '' : 's'} registrado${context.moduleCount === 1 ? '' : 's'}`,
+        icon: Activity,
+        trend: 'online',
+        tone: 'emerald',
+      },
+      {
+        label: 'Ingreso mensual',
+        value: `S/ ${context.monthlyIncome.toFixed(2)}`,
+        sub: `Utilidad neta: S/ ${context.netProfit.toFixed(2)}`,
+        icon: DollarSign,
+        trend: `${context.margin.toFixed(1)}% margen`,
+        tone: 'gold',
+      },
+      {
+        label: 'Tareas pendientes',
+        value: `${pendingTasks.length}`,
+        sub: 'Rutina operativa activa',
+        icon: ClipboardList,
+        trend: 'conectado',
+        tone: 'slate',
+      },
+    ],
+    [context, pendingTasks.length],
+  );
+
+  return (
+    <div className="space-y-4 animate-fade-in text-white sm:space-y-5">
+      <section className="relative overflow-hidden rounded-2xl border border-[#d6a84f]/25 bg-[#12372a] p-4 shadow-2xl shadow-[#12372a]/20 sm:p-5">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(214,168,79,0.28),transparent_34%),linear-gradient(135deg,rgba(18,55,42,0.98),rgba(47,125,75,0.82)_58%,rgba(74,91,45,0.72))]" />
+        <div className="relative grid gap-5 lg:grid-cols-[1.45fr_0.9fr]">
+          <div className="space-y-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#f2d58a]/25 bg-[#f2d58a]/10 px-3 py-1 text-xs font-bold text-[#f2d58a]">
+                  <Zap size={13} className="animate-pulse" />
+                  Command Center Agro IA
+                </div>
+                <h2 className="text-xl font-black tracking-normal text-white sm:text-3xl">
+                  IAVet monitorea tu criadero en tiempo real
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-slate-300">
+                  Produccion, alertas, clima, registros y finanzas en una vista pensada para una operacion pecuaria real.
+                </p>
+              </div>
+              <button
+                onClick={() => setVoiceListening((value) => !value)}
+                className={clsx(
+                  'inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold transition-all duration-300 sm:w-auto',
+                  voiceListening
+                    ? 'border-[#f2d58a]/70 bg-[#f2d58a] text-[#12372a] shadow-lg shadow-[#d6a84f]/20'
+                    : 'border-[#f2d58a]/30 bg-white/8 text-[#f4ead0] hover:bg-white/12',
+                )}
+              >
+                <Mic size={17} />
+                {voiceListening ? 'Escuchando...' : 'Registrar por voz'}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 min-[430px]:grid-cols-2 lg:grid-cols-4">
+              {metricCards.map((metric) => {
+                const Icon = metric.icon;
+                return (
+                  <div
+                    key={metric.label}
+                    className="rounded-xl border border-[#f2d58a]/15 bg-white/[0.08] p-3 backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:border-[#f2d58a]/35 hover:bg-white/[0.12] sm:p-4"
+                  >
+                    <div className="mb-3 flex items-center justify-between">
+                      <div className="rounded-lg bg-[#f2d58a]/12 p-2 text-[#f2d58a]">
+                        <Icon size={18} />
+                      </div>
+                      <span className="rounded-full bg-white/10 px-2 py-1 text-[11px] font-bold uppercase text-slate-300">
+                        {metric.trend}
+                      </span>
+                    </div>
+                    <p className="text-2xl font-black text-white">{metric.value}</p>
+                    <p className="mt-1 text-xs font-bold text-slate-200">{metric.label}</p>
+                    <p className="mt-1 text-[11px] font-medium text-slate-400">{metric.sub}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-[#f2d58a]/15 bg-white/[0.08] p-4">
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-black text-white">Tendencia productiva</h3>
+                <p className="text-xs font-medium text-slate-400">Huevos reales vs objetivo IA</p>
+              </div>
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#f2d58a]/10 px-2.5 py-1 text-xs font-bold text-[#f2d58a]">
+                <TrendingDown size={12} />
+                {context.dropPercent.toFixed(1)}%
+              </span>
+            </div>
+            <MiniTrendChart trend={chartTrend} />
+            
+            {/* Nuevo bloque para llenar el espacio y dar valor */}
+            <div className="mt-6 border-t border-white/10 pt-4">
+              <h4 className="text-[11px] font-black uppercase tracking-wider text-[#f2d58a]">Resumen Operativo</h4>
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <div className="rounded-lg bg-white/5 p-3">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">Utilidad Proyectada</p>
+                  <p className="mt-1 text-sm font-black text-emerald-400">S/ {context.netProfit.toFixed(2)}</p>
+                </div>
+                <div className="rounded-lg bg-white/5 p-3">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">Eficiencia Lote</p>
+                  <p className="mt-1 text-sm font-black text-amber-400">{context.margin.toFixed(1)}%</p>
+                </div>
+                <div className="rounded-lg bg-white/5 p-3">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">Cajas/Jabas Hoy</p>
+                  <p className="mt-1 text-sm font-black text-white">{Math.floor(context.latestEggs / 30)} jaba(s)</p>
+                </div>
+                <div className="rounded-lg bg-white/5 p-3">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">Meta Diaria</p>
+                  <p className="mt-1 text-sm font-black text-slate-300">{context.breakEvenDaily} huevos</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-5 lg:grid-cols-3">
+        <section className="rounded-2xl border border-[#1f4f35]/20 bg-[#12372a] p-4 shadow-xl shadow-[#12372a]/10 sm:p-5 lg:col-span-2">
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-black text-white">Alertas IA y recomendaciones</h3>
+              <p className="text-xs font-medium text-[#b7cbbd]">Analisis automatico de produccion, clima y sincronizacion.</p>
+            </div>
+            <Bell size={18} className="text-amber-300" />
           </div>
           <div className="space-y-3">
-            {recentActivity.map((item) => (
+            {aiAlerts.length === 0 && (
+              <div className="rounded-xl border border-[#9bc5a8]/25 bg-[#1f5b3b]/55 p-4 text-emerald-50">
+                <p className="text-sm font-black">Sin alertas criticas</p>
+                <p className="mt-1 text-xs leading-relaxed opacity-80">
+                  Registra produccion, alimento, tareas y modulos para que IAVet genere recomendaciones automaticas.
+                </p>
+              </div>
+            )}
+            {aiAlerts.map((alert) => (
               <div
-                key={item.id}
-                className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 transition-all duration-200 group border border-transparent hover:border-slate-100"
+                key={alert.id}
+                className={clsx('rounded-xl border p-4 transition-all duration-300 hover:translate-x-1', severityStyles[alert.severity])}
               >
-                <div className={clsx('w-9 h-9 rounded-xl border flex items-center justify-center text-base flex-shrink-0', activityColorMap[item.color] || activityColorMap.blue)}>
-                  {item.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-800 font-semibold leading-snug group-hover:text-slate-900">{item.text}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{item.time}</p>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-black">{alert.title}</p>
+                    <p className="mt-1 text-xs leading-relaxed opacity-80">{alert.detail}</p>
+                    <p className="mt-3 text-xs font-bold text-emerald-200">{alert.recommendation}</p>
+                  </div>
+                  <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] font-black uppercase">
+                    IA
+                  </span>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Upcoming Vaccines */}
-        <div className="glass-card p-5">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="section-title">Próximas Vacunas</h3>
-            <Syringe size={16} className="text-amber-500" />
+        <section className="rounded-2xl border border-[#1f4f35]/20 bg-[#12372a] p-4 shadow-xl shadow-[#12372a]/10 sm:p-5">
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-black text-white">Clima del galpon</h3>
+              <p className="text-xs font-medium text-[#b7cbbd]">Riesgo operativo rapido.</p>
+            </div>
+            <span className="rounded-full bg-amber-300/10 px-2.5 py-1 text-xs font-bold text-amber-200">vigilar</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-xl border border-[#f2d58a]/15 bg-white/[0.07] p-4">
+              <Thermometer size={18} className="mb-3 text-amber-200" />
+              <p className="text-2xl font-black text-white">-- C</p>
+              <p className="text-xs font-medium text-slate-400">Temperatura</p>
+            </div>
+            <div className="rounded-xl border border-[#9dd5df]/15 bg-white/[0.07] p-4">
+              <Droplets size={18} className="mb-3 text-sky-200" />
+              <p className="text-2xl font-black text-white">--%</p>
+              <p className="text-xs font-medium text-slate-400">Humedad</p>
+            </div>
+          </div>
+          <div className="mt-4 rounded-xl border border-[#9bc5a8]/25 bg-[#2f7d4b]/20 p-4">
+            <p className="text-xs font-black uppercase text-[#cde8d0]">IA pensando</p>
+            <div className="mt-2 flex gap-1">
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className="h-1.5 w-1.5 rounded-full bg-emerald-300 animate-bounce"
+                  style={{ animationDelay: `${i * 0.15}s` }}
+                />
+              ))}
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-slate-300">
+              Si la temperatura supera 30 C, priorizar ventilacion y agua antes de registrar nuevas tareas.
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 text-slate-900 shadow-sm sm:p-5">
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <h3 className="section-title">Historial rapido</h3>
+            <span className="badge-success">Auto guardado</span>
           </div>
           <div className="space-y-3">
-            {upcomingVaccines.map((pet) => {
-              const vaccDate = new Date(pet.nextVaccine);
-              const today = new Date();
-              const daysLeft = Math.ceil((vaccDate - today) / (1000 * 60 * 60 * 24));
-              return (
-                <div
-                  key={pet.id}
-                  className="p-3 rounded-xl bg-white border border-slate-200 hover:border-amber-300 hover:shadow-sm transition-all duration-200"
-                >
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-lg bg-slate-50 p-1 rounded-md border border-slate-100">{pet.emoji}</span>
-                    <span className="text-sm font-bold text-slate-800">{pet.name}</span>
-                  </div>
-                  <p className="text-xs text-slate-500 mb-2 font-medium">{pet.breed}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-1 rounded-md">
-                      {vaccDate.toLocaleDateString('es-PE', { day: '2-digit', month: 'short' })}
-                    </span>
-                    <span
-                      className={clsx(
-                        'text-xs font-bold px-2 py-1 rounded-md',
-                        daysLeft <= 10
-                          ? 'bg-red-100 text-red-700'
-                          : daysLeft <= 30
-                          ? 'bg-amber-100 text-amber-700'
-                          : 'bg-emerald-100 text-emerald-700',
-                      )}
-                    >
-                      {daysLeft <= 0 ? 'Vencida' : `${daysLeft} días`}
-                    </span>
-                  </div>
+            {quickHistory.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+                <p className="text-sm font-black text-slate-900">Aun no hay historial</p>
+                <p className="mx-auto mt-1 max-w-sm text-xs font-medium leading-relaxed text-slate-500">
+                  Guarda produccion, alimento o tareas para ver aqui los eventos recientes.
+                </p>
+              </div>
+            )}
+            {quickHistory.map((item) => (
+              <div key={item.id} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                <div className="h-10 w-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">
+                  {item.label.slice(0, 2).toUpperCase()}
                 </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-slate-900">{item.value}</p>
+                  <p className="text-xs font-medium text-slate-500">{item.time} · {item.status}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-4 text-slate-900 shadow-sm sm:p-5">
+          <div className="mb-4 flex items-center gap-2">
+            <Zap size={16} className="text-emerald-600" />
+            <h3 className="section-title">Accesos rapidos IA</h3>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {[
+              { label: 'Hablar con IAVet', tab: 'vetcoach', icon: Mic, desc: 'Voz, texto e imagenes' },
+              { label: 'Registrar datos', tab: 'records', icon: ClipboardList, desc: 'Huevos, alimento y tareas' },
+              { label: 'Calcular utilidad', tab: 'calculator', icon: DollarSign, desc: 'Costos, margen y equilibrio' },
+              { label: 'Analizar fotos', tab: 'vetcoach', icon: Camera, desc: 'Conteo con validacion' },
+              { label: 'Ver modulos pecuarios', tab: 'pets', icon: Activity, desc: 'Produccion e historial' },
+              { label: 'Mercado pecuario', tab: 'market', icon: TrendingUp, desc: 'Huevos, alimento y aves' },
+            ].map((action) => {
+              const Icon = action.icon;
+              return (
+                <button
+                  key={action.label}
+                  onClick={() => onTabChange(action.tab)}
+                  className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md"
+                >
+                  <span className="rounded-lg bg-emerald-50 p-2 text-emerald-700">
+                    <Icon size={18} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-black text-slate-900">{action.label}</span>
+                    <span className="block text-xs font-medium text-slate-500">{action.desc}</span>
+                  </span>
+                  <ArrowRight size={16} className="text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-emerald-600" />
+                </button>
               );
             })}
           </div>
-        </div>
+        </section>
       </div>
 
-      {/* Quick Actions */}
-      <div className="glass-card p-5 bg-gradient-to-br from-slate-50 to-white">
-        <div className="flex items-center gap-2 mb-5">
-          <Zap size={16} className="text-emerald-500" />
-          <h3 className="section-title">Acciones Rápidas</h3>
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 text-slate-900 shadow-sm sm:p-5">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <h3 className="section-title">Actividad reciente automatizada</h3>
+            <p className="section-subtitle">Eventos creados por voz, imagen y chat IA.</p>
+          </div>
+          <span className="badge-info">En vivo</span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {[
-            { label: 'Registrar nuevo animal', tab: 'pets', emoji: '➕', desc: 'Agrega un perfil al sistema' },
-            { label: 'Consultar al VetCoach IA', tab: 'vetcoach', emoji: '🤖', desc: 'Orientación inteligente 24/7' },
-            { label: 'Ver noticias SENASA', tab: 'market', emoji: '📋', desc: 'Alertas y regulaciones' },
-          ].map((action) => (
-            <button
-              key={action.tab}
-              id={`quick-action-${action.tab}`}
-              onClick={() => onTabChange(action.tab)}
-              className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-200 
-                         hover:border-emerald-300 hover:shadow-md transition-all duration-200 
-                         text-left group"
-            >
-              <span className="text-2xl bg-slate-50 p-2 rounded-xl border border-slate-100 group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-colors">{action.emoji}</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-slate-800 group-hover:text-emerald-700 transition-colors">
-                  {action.label}
-                </p>
-                <p className="text-xs text-slate-500 font-medium">{action.desc}</p>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          {recentActivity.length === 0 && (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-xs font-bold text-slate-500 md:col-span-2 xl:col-span-5">
+              Sin actividad reciente. Los eventos apareceran automaticamente al registrar datos.
+            </div>
+          )}
+          {recentActivity.map((item) => (
+            <div key={item.id} className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+              <div className={clsx('mb-3 inline-flex h-9 min-w-9 items-center justify-center rounded-lg border px-2 text-xs font-black', activityColorMap[item.color])}>
+                {item.icon}
               </div>
-              <ArrowRight size={16} className="text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" />
-            </button>
+              <p className="text-xs font-bold leading-snug text-slate-800">{item.text}</p>
+              <p className="mt-2 text-[11px] font-medium text-slate-500">{item.time}</p>
+            </div>
           ))}
         </div>
-      </div>
+      </section>
     </div>
   );
 }

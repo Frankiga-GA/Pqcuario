@@ -1,263 +1,66 @@
-// ─── Mock Pets ────────────────────────────────────────────────────────────────
-export const mockPets = [
-  {
-    id: 1,
-    name: 'Luna',
-    species: 'Perro',
-    breed: 'Golden Retriever',
-    age: '3 años',
-    weight: '28 kg',
-    ownerName: 'Carlos Mendoza',
-    ownerDni: '45123678',
-    status: 'Saludable',
-    statusType: 'success',
-    nextVaccine: '2026-06-15',
-    lastCheckup: '2026-03-20',
-    color: 'emerald',
-    emoji: '🐕',
-    notes: 'Activa y juguetona. Dieta balanceada con croquetas premium.',
-  },
-  {
-    id: 2,
-    name: 'Mochi',
-    species: 'Gato',
-    breed: 'Persa',
-    age: '5 años',
-    weight: '4.2 kg',
-    ownerName: 'Ana Ríos',
-    ownerDni: '38756421',
-    status: 'En Observación',
-    statusType: 'warning',
-    nextVaccine: '2026-05-30',
-    lastCheckup: '2026-04-10',
-    color: 'amber',
-    emoji: '🐈',
-    notes: 'Necesita revisión ocular. Tratamiento con gotas prescritas.',
-  },
-  {
-    id: 3,
-    name: 'Estrella',
-    species: 'Vaca',
-    breed: 'Holstein',
-    age: '4 años',
-    weight: '520 kg',
-    ownerName: 'Jorge Huanca',
-    ownerDni: '29874563',
-    status: 'Saludable',
-    statusType: 'success',
-    nextVaccine: '2026-07-01',
-    lastCheckup: '2026-02-15',
-    color: 'blue',
-    emoji: '🐄',
-    notes: 'Producción lechera de 20 L/día. Excelente condición corporal.',
-  },
-  {
-    id: 4,
-    name: 'Rex',
-    species: 'Perro',
-    breed: 'Pastor Alemán',
-    age: '2 años',
-    weight: '32 kg',
-    ownerName: 'María Torres',
-    ownerDni: '52341987',
-    status: 'Vacuna Pendiente',
-    statusType: 'danger',
-    nextVaccine: '2026-05-20',
-    lastCheckup: '2025-11-05',
-    color: 'red',
-    emoji: '🐕‍🦺',
-    notes: 'Adiestramiento en curso. Alta energía. Necesita vacuna antirrábica.',
-  },
-  {
-    id: 5,
-    name: 'Canela',
-    species: 'Alpaca',
-    breed: 'Huacaya',
-    age: '6 años',
-    weight: '68 kg',
-    ownerName: 'Pedro Quispe',
-    ownerDni: '31458790',
-    status: 'Saludable',
-    statusType: 'success',
-    nextVaccine: '2026-08-10',
-    lastCheckup: '2026-01-22',
-    color: 'purple',
-    emoji: '🦙',
-    notes: 'Fibra de alta calidad. Última esquila en enero 2026.',
-  },
-  {
-    id: 6,
-    name: 'Nemo',
-    species: 'Pez',
-    breed: 'Koi Japonés',
-    age: '8 años',
-    weight: '1.2 kg',
-    ownerName: 'Sofía Vargas',
-    ownerDni: '47892134',
-    status: 'En Tratamiento',
-    statusType: 'warning',
-    nextVaccine: 'N/A',
-    lastCheckup: '2026-04-28',
-    color: 'amber',
-    emoji: '🐠',
-    notes: 'Tratamiento antiparasitario en estanque. Mejora progresiva.',
-  },
+export const productionSummary = {
+  date: new Date().toISOString().split('T')[0],
+  flock: 0,
+  dailyEggs: 0,
+  expectedEggs: 0,
+  weeklyAverage: 0,
+  productionRate: 0,
+  feedKg: 0,
+  waterLiters: 0,
+  temperature: 0,
+  humidity: 0,
+  offlineRecords: 0,
+  aiConfidence: 0,
+};
+
+export const productionTrend = [
+  { day: 'Vie', eggs: 0, expected: 0 },
+  { day: 'Sab', eggs: 0, expected: 0 },
+  { day: 'Dom', eggs: 0, expected: 0 },
+  { day: 'Lun', eggs: 0, expected: 0 },
+  { day: 'Mar', eggs: 0, expected: 0 },
+  { day: 'Mie', eggs: 0, expected: 0 },
+  { day: 'Hoy', eggs: 0, expected: 0 },
 ];
 
-// ─── Market News ───────────────────────────────────────────────────────────────
-export const marketNews = [
-  {
-    id: 1,
-    category: 'senasa',
-    categoryLabel: 'Alerta SENASA',
-    title: 'Alerta sanitaria: Brote de fiebre aftosa en región Puno',
-    summary:
-      'SENASA declara estado de emergencia sanitaria en 3 provincias de Puno. Se exige cuarentena para movilización de bovinos y camélidos. Vacunación obligatoria antes del 30 de mayo.',
-    date: '2026-05-10',
-    urgent: true,
-    link: '#',
-  },
-  {
-    id: 2,
-    category: 'prices',
-    categoryLabel: 'Precios de Mercado',
-    title: 'Precio del kg de carne de res sube 8% en Lima Metropolitana',
-    summary:
-      'El precio al productor subió de S/. 12.50 a S/. 13.50/kg en el mercado de Lima. Expertos atribuyen el alza a menores stocks de ganado y mayor demanda estacional.',
-    date: '2026-05-09',
-    urgent: false,
-    link: '#',
-  },
-  {
-    id: 3,
-    category: 'guides',
-    categoryLabel: 'Guía Técnica',
-    title: 'Guía SENASA 2026: Registro de predios pecuarios actualizado',
-    summary:
-      'Nueva resolución actualiza los requisitos para el registro de predios. Se incorpora el módulo digital de trazabilidad animal y la georreferenciación obligatoria para granjas > 5 ha.',
-    date: '2026-05-07',
-    urgent: false,
-    link: '#',
-  },
-  {
-    id: 4,
-    category: 'prices',
-    categoryLabel: 'Precios de Mercado',
-    title: 'Fibra de alpaca Huacaya alcanza precio récord en mercado europeo',
-    summary:
-      'La fibra categoría royal se cotizó a USD 38/kg en la última feria de exportación. Las cooperativas de Puno y Cusco reportan incremento del 22% en sus ingresos.',
-    date: '2026-05-06',
-    urgent: false,
-    link: '#',
-  },
-  {
-    id: 5,
-    category: 'senasa',
-    categoryLabel: 'Alerta SENASA',
-    title: 'Campaña nacional de vacunación contra la rabia canina 2026',
-    summary:
-      'SENASA y MINSA anuncian la Campaña Nacional de vacunación antirrábica gratuita del 15 al 31 de mayo. Se espera vacunar más de 2 millones de canes en todo el país.',
-    date: '2026-05-05',
-    urgent: false,
-    link: '#',
-  },
-  {
-    id: 6,
-    category: 'guides',
-    categoryLabel: 'Guía Técnica',
-    title: 'Buenas Prácticas Pecuarias (BPP): Nueva guía para ganado lechero',
-    summary:
-      'El INIA publica la actualización de la guía BPP para producción lechera. Incluye protocolos de bienestar animal, manejo de efluentes y estándares de higiene en el ordeño.',
-    date: '2026-05-03',
-    urgent: false,
-    link: '#',
-  },
-];
+export const aiAlerts = [];
 
-// ─── AI Responses ──────────────────────────────────────────────────────────────
+export const financialProjection = {
+  eggPrice: 0,
+  dailyIncome: 0,
+  monthlyIncome: 0,
+  feedCost: 0,
+  otherCosts: 0,
+  netProfit: 0,
+  margin: 0,
+};
+
+export const quickHistory = [];
+
+export const livestockModules = [];
+
+export const mockPets = [];
+
+export const visualHistory = [];
+
+export const marketNews = [];
+
 export const aiResponses = {
-  vacuna: {
-    keywords: ['vacuna', 'vacunar', 'inmunizar', 'antirrábica', 'rabia', 'vacunación'],
+  produccion: {
+    keywords: ['huevo', 'huevos', 'produccion', 'recogi', 'postura', 'registro', 'registre'],
     responses: [
-      '🩺 **Plan de vacunación recomendado:**\n\n**Perros y Gatos:**\n• Antirrábica — anual obligatoria\n• Parvovirus, Moquillo, Hepatitis (DHPP) — cada 3 años\n• Bordatella — anual para animales en contacto social\n\n**Bovinos:**\n• Fiebre aftosa — 2 veces al año (obligatoria SENASA)\n• Brucelosis — vaquillas de 3-8 meses\n\n¿Quieres el calendario específico para algún animal en particular? 📅',
+      'Esperando datos de producción para analizar...',
     ],
   },
-  comida: {
-    keywords: ['comida', 'alimentar', 'alimento', 'nutrición', 'dieta', 'comer', 'food', 'forraje', 'pasto'],
+  finanzas: {
+    keywords: ['ganar', 'ganare', 'ingreso', 'utilidad', 'margen', 'precio', 'venta', 'mes'],
     responses: [
-      '🥗 **Guía de nutrición por especie:**\n\n**Perros adultos:**\n• 2-3% de su peso corporal en croquetas/día\n• Suplemento Omega-3 para pelaje brillante\n• Agua fresca siempre disponible\n\n**Gatos:**\n• Proteína animal ≥ 30% (obligatorio, no son omnívoros)\n• Húmedo + seco para hidratación\n\n**Bovinos:**\n• Forraje base: 10-15 kg de MS/día\n• Concentrado según producción láctea\n• Sales minerales bloques\n\n¿Tienes alguna duda específica sobre tu animal? 🌿',
-    ],
-  },
-  adiestramiento: {
-    keywords: ['adiestramiento', 'entrenar', 'entrenamiento', 'obediencia', 'comportamiento', 'conducta', 'adiestrar'],
-    responses: [
-      '🎓 **Principios de adiestramiento positivo:**\n\n**Fundamentos clave:**\n• ✅ Refuerzo positivo — recompensa el comportamiento deseado inmediatamente\n• ❌ Nunca castigar físicamente — genera miedo y agresividad\n• ⏱️ Sesiones cortas — 10-15 min, 2-3 veces al día\n• 🔄 Consistencia — todos en casa deben usar los mismos comandos\n\n**Comandos básicos (orden recomendado):**\n1. "Siéntate" → "Quieto" → "Ven"\n2. "Échate" → "Suelta"\n\n💡 La edad ideal para iniciar: 8-16 semanas (periodo crítico de socialización).',
-    ],
-  },
-  enfermedad: {
-    keywords: ['enfermedad', 'enfermo', 'síntoma', 'fiebre', 'diarrea', 'vómito', 'herida', 'dolor', 'triste', 'lento', 'parásito'],
-    responses: [
-      '⚠️ **Señales de alerta — cuándo ir al veterinario:**\n\n**Urgencia INMEDIATA (0-2 horas):**\n🔴 Dificultad para respirar\n🔴 Convulsiones o pérdida de conciencia\n🔴 Sangrado abundante o heridas profundas\n🔴 Ingesta de tóxicos\n\n**Consulta en 24-48 horas:**\n🟡 Vómitos/diarrea por más de 12 horas\n🟡 Fiebre (> 39.5°C en perros/gatos)\n🟡 Pérdida de apetito por más de 2 días\n🟡 Letargo inusual\n\n**Recuerda:** Nunca automediques. Los medicamentos humanos pueden ser **tóxicos** para animales. 🚨',
-    ],
-  },
-  precio: {
-    keywords: ['precio', 'costo', 'vender', 'mercado', 'valor', 'cuánto', 'cotización'],
-    responses: [
-      '📊 **Precios de referencia (Lima, mayo 2026):**\n\n**Ganado:**\n• Carne de res en pie: S/. 8.50-9.00/kg\n• Leche fresca: S/. 1.80-2.10/L\n• Fibra alpaca (Huacaya fina): USD 25-38/kg\n\n**Mascotas (servicios):**\n• Consulta veterinaria básica: S/. 60-120\n• Vacunación completa anual: S/. 150-280\n• Baño y corte: S/. 40-120 según tamaño\n\n📈 Para datos actualizados, revisa la sección **Mercado & Guía** de PetGuide AI.',
-    ],
-  },
-  senasa: {
-    keywords: ['senasa', 'registro', 'predio', 'certificado', 'normativa', 'legal', 'trámite'],
-    responses: [
-      '📋 **Trámites SENASA más frecuentes:**\n\n**Registro de predio pecuario:**\n• Solicitud en oficina SENASA regional o web\n• Documentos: DNI, título/contrato predio, croquis\n• Tiempo: 15-30 días hábiles\n\n**Guía de tránsito animal:**\n• Obligatoria para movilización interprovincial\n• Solicitar 48h antes del traslado\n• Validez: 3-7 días según especie\n\n**Certificado sanitario:**\n• Para exportación o ferias\n• Requiere inspección previa de veterinario oficial\n\n🌐 Web oficial: **www.senasa.gob.pe** | Teléfono: 313-3000',
+      'Registra datos en la calculadora para ver proyecciones financieras.',
     ],
   },
   default: [
-    '🤖 ¡Hola! Soy VetCoach IA, tu asistente de orientación pecuaria y de mascotas.\n\nPuedo ayudarte con:\n• 💉 **Vacunas** — calendarios y protocolos\n• 🥗 **Nutrición** — dietas y alimentación\n• 🎓 **Adiestramiento** — técnicas y consejos\n• 🏥 **Enfermedades** — síntomas y cuándo acudir al vet\n• 📊 **Precios de mercado** — referencia actualizada\n• 📋 **SENASA** — trámites y normativa\n\n¿Sobre qué tema tienes dudas hoy?',
-    '🌿 Estoy aquí para orientarte. Puedes preguntarme sobre la salud de tus animales, su nutrición, comportamiento o sobre los requisitos SENASA. ¿En qué te puedo ayudar?',
+    '**Hola, soy IAVet Agro IA.**\n\nEstoy listo para operar con tus datos reales de Supabase.',
   ],
 };
 
-// ─── Recent Activity ───────────────────────────────────────────────────────────
-export const recentActivity = [
-  {
-    id: 1,
-    type: 'vaccine',
-    icon: '💉',
-    text: 'Vacuna antirrábica aplicada a Rex',
-    time: 'Hace 2 días',
-    color: 'emerald',
-  },
-  {
-    id: 2,
-    type: 'alert',
-    icon: '⚠️',
-    text: 'Alerta: Vacuna pendiente para Rex (antirrábica)',
-    time: 'Hace 3 días',
-    color: 'amber',
-  },
-  {
-    id: 3,
-    type: 'chat',
-    icon: '🤖',
-    text: 'Consulta IA: Plan de nutrición para Estrella',
-    time: 'Hace 4 días',
-    color: 'blue',
-  },
-  {
-    id: 4,
-    type: 'new',
-    icon: '✨',
-    text: 'Nuevo animal registrado: Nemo (Koi Japonés)',
-    time: 'Hace 5 días',
-    color: 'purple',
-  },
-  {
-    id: 5,
-    type: 'checkup',
-    icon: '🏥',
-    text: 'Revisión general completada: Mochi',
-    time: 'Hace 1 semana',
-    color: 'blue',
-  },
-];
+export const recentActivity = [];
