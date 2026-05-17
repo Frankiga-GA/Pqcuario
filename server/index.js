@@ -2,6 +2,11 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import { GoogleGenAI } from '@google/genai';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -238,6 +243,13 @@ No uses markdown dentro del JSON.
       detail: error.message,
     });
   }
+});
+
+// Serve frontend in production
+app.use(express.static(path.join(__dirname, '../dist')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 app.listen(port, () => {
