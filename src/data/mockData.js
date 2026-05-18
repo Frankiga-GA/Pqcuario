@@ -59,7 +59,7 @@ export const aiResponses = {
     ],
   },
   default: [
-    '**¡Hola, amigo productor! 🧑‍🌾 Soy IAVet, tu asistente virtual inteligente.**\n\nEstoy muy feliz de saludarte y listo para ayudarte a monitorear y cuidar tu criadero. 🐔🥚\n\nYa me conecté con éxito a tu base de datos en **Supabase** en tiempo real. Ahora puedo registrar tu producción de huevos, analizar el consumo de alimento y calcular tus ganancias al instante.\n\nEscríbeme con total confianza o mándame una foto/audio desde el campo. ¡Hagamos crecer tu granja juntos! 🚀📈',
+    '**¡Hola, amigo productor! 🧑‍🌾 Soy IAVet, tu asistente virtual inteligente.**\n\nEstoy muy feliz de saludarte y listo para ayudarte a monitorear y cuidar tu criadero. 🐔🥚\n\nYa estoy conectado en tiempo real con la información de tu granja. Ahora puedo ayudarte a registrar la producción de huevos, analizar el consumo de alimento y calcular tus ganancias al instante.\n\nEscríbeme con total confianza o mándame una foto/audio desde el campo. ¡Hagamos crecer tu granja juntos! 🚀📈',
   ],
 };
 
