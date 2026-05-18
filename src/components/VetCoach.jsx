@@ -12,6 +12,7 @@ import {
   Sparkles,
   Trash2,
   User,
+  X,
 } from 'lucide-react';
 import { aiResponses, visualHistory } from '../data/mockData';
 import { clsx } from 'clsx';
@@ -230,6 +231,7 @@ export default function VetCoach() {
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [activeMobileTab, setActiveMobileTab] = useState('chat'); // 'chat' | 'vision' | 'history'
+  const [attachedImage, setAttachedImage] = useState(null); // Preview attachment state
   const bottomRef = useRef(null);
   const fileInputRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -247,14 +249,15 @@ export default function VetCoach() {
 
   const sendMessage = async (text, image = null, audio = null) => {
     const userText = text || input.trim();
-    if (!userText && !image && !audio) return;
+    const imageToSend = image || attachedImage;
+    if (!userText && !imageToSend && !audio) return;
 
     const now = new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
     const userMsg = {
       id: nextId(),
       role: 'user',
       text: userText || (audio ? 'Audio de campo para IAVet' : 'Imagen para analisis IA'),
-      image,
+      image: imageToSend,
       audio,
       time: now,
     };
@@ -266,12 +269,13 @@ export default function VetCoach() {
     saveAIMessageRemote({
       role: 'user',
       text: userMsg.text,
-      mediaType: audio ? 'audio' : image ? 'image' : null,
+      mediaType: audio ? 'audio' : imageToSend ? 'image' : null,
     });
     setInput('');
+    setAttachedImage(null); // Reset preview capsule
     setIsTyping(true);
 
-    const fallbackText = image
+    const fallbackText = imageToSend
       ? '**Analisis visual listo para validar**\n\nNo pude confirmar con IA externa, pero deje la foto cargada para revision.'
       : audio
         ? '**Audio recibido**\n\nNo pude procesar la voz con IA externa en este momento.'
@@ -311,9 +315,8 @@ export default function VetCoach() {
     const file = event.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = async () => {
-      const image = reader.result;
-      sendMessage('Analiza esta imagen', image);
+    reader.onload = () => {
+      setAttachedImage(reader.result);
     };
     reader.readAsDataURL(file);
   };
@@ -475,7 +478,23 @@ export default function VetCoach() {
             </div>
 
             {/* Input area */}
-            <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm sm:mt-4 sm:p-3 shrink-0">
+            <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm sm:mt-4 sm:p-3 shrink-0 animate-fade-in">
+              {attachedImage && (
+                <div className="mb-2 flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/60 p-2 w-fit animate-fade-in">
+                  <img src={attachedImage} className="h-10 w-10 object-cover rounded-lg border border-slate-200 shrink-0" alt="Vista previa" />
+                  <div className="flex flex-col min-w-0 pr-2">
+                    <span className="text-[10px] font-black text-emerald-700 uppercase tracking-wider leading-none mb-1">Imagen cargada</span>
+                    <span className="text-[11px] font-medium text-slate-500 truncate max-w-[150px]">Lista para enviar con tu pregunta</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAttachedImage(null)}
+                    className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-200/70 text-slate-600 transition-all hover:bg-red-100 hover:text-red-700"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              )}
               <div className="flex items-end gap-2">
                 <button
                   type="button"
@@ -510,10 +529,10 @@ export default function VetCoach() {
                 <button
                   id="send-message-btn"
                   onClick={() => sendMessage()}
-                  disabled={!input.trim() || isTyping}
+                  disabled={(!input.trim() && !attachedImage) || isTyping}
                   className={clsx(
                     'mb-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-200',
-                    input.trim() && !isTyping
+                    (input.trim() || attachedImage) && !isTyping
                       ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 hover:scale-105 hover:bg-emerald-700'
                       : 'cursor-not-allowed bg-slate-100 text-slate-400',
                   )}
@@ -556,7 +575,23 @@ export default function VetCoach() {
           </div>
 
           {/* Input area */}
-          <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm sm:mt-4 sm:p-3 shrink-0">
+          <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm sm:mt-4 sm:p-3 shrink-0 animate-fade-in">
+            {attachedImage && (
+              <div className="mb-2 flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/60 p-2 w-fit animate-fade-in">
+                <img src={attachedImage} className="h-10 w-10 object-cover rounded-lg border border-slate-200 shrink-0" alt="Vista previa" />
+                <div className="flex flex-col min-w-0 pr-2">
+                  <span className="text-[10px] font-black text-emerald-700 uppercase tracking-wider leading-none mb-1">Imagen cargada</span>
+                  <span className="text-[11px] font-medium text-slate-500 truncate max-w-[180px]">Lista para enviar con tu pregunta</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAttachedImage(null)}
+                  className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-200/70 text-slate-600 transition-all hover:bg-red-100 hover:text-red-700"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            )}
             <div className="flex items-end gap-2">
               <button
                 type="button"
@@ -591,10 +626,10 @@ export default function VetCoach() {
               <button
                 id="send-message-btn-desktop"
                 onClick={() => sendMessage()}
-                disabled={!input.trim() || isTyping}
+                disabled={(!input.trim() && !attachedImage) || isTyping}
                 className={clsx(
                   'mb-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-200',
-                  input.trim() && !isTyping
+                  (input.trim() || attachedImage) && !isTyping
                     ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 hover:scale-105 hover:bg-emerald-700'
                     : 'cursor-not-allowed bg-slate-100 text-slate-400',
                 )}
