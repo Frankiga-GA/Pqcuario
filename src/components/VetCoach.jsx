@@ -450,9 +450,9 @@ export default function VetCoach() {
           </button>
         </div>
 
-        {/* CHAT TAB CONTENT (Mobile) or ALWAYS VISIBLE (Desktop) */}
+        {/* CHAT TAB CONTENT (Mobile) */}
         {activeMobileTab === 'chat' && (
-          <div className="flex min-h-0 flex-col flex-1 animate-fade-in">
+          <div className="flex lg:hidden min-h-0 flex-col flex-1 animate-fade-in">
             {/* Suggested prompts */}
             <div className="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:mb-4 sm:px-0 shrink-0">
               {SUGGESTED_PROMPTS.map((prompt) => (
