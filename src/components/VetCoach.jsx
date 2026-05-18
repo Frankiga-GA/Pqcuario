@@ -4,6 +4,7 @@ import {
   Bot,
   Camera,
   CheckCircle2,
+  History,
   ImagePlus,
   Loader,
   Mic,
@@ -228,6 +229,7 @@ export default function VetCoach() {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [activeMobileTab, setActiveMobileTab] = useState('chat'); // 'chat' | 'vision' | 'history'
   const bottomRef = useRef(null);
   const fileInputRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -374,9 +376,10 @@ export default function VetCoach() {
   };
 
   return (
-    <div className="grid min-h-[calc(100dvh-5.5rem)] gap-4 animate-fade-in lg:h-[calc(100vh-7rem)] lg:grid-cols-[minmax(0,1fr)_360px]">
-      <div className="flex min-h-0 flex-col">
-        <div className="mb-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:mb-4 sm:p-4">
+    <div className="grid h-[calc(100dvh-6.5rem)] lg:h-[calc(100vh-7rem)] min-h-0 gap-4 animate-fade-in lg:grid-cols-[minmax(0,1fr)_360px] overflow-hidden">
+      <div className="flex min-h-0 flex-col flex-1">
+        {/* Title Bar */}
+        <div className="mb-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:mb-4 sm:p-4 shrink-0">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-100 sm:h-11 sm:w-11">
@@ -404,89 +407,246 @@ export default function VetCoach() {
           </div>
         </div>
 
-        <div className="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:mb-4 sm:px-0">
-          {SUGGESTED_PROMPTS.map((prompt) => (
-            <button
-              key={prompt}
-              onClick={() => sendMessage(prompt)}
-              disabled={isTyping}
-              className="flex flex-shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 shadow-sm transition-all duration-200 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <Sparkles size={11} className="text-emerald-500" />
-              {prompt}
-            </button>
-          ))}
+        {/* Mobile Tab Selector */}
+        <div className="mb-3 flex rounded-xl border border-slate-200/80 bg-slate-100 p-1 lg:hidden shrink-0 shadow-sm">
+          <button
+            onClick={() => setActiveMobileTab('chat')}
+            className={clsx(
+              'flex-1 py-2 text-xs font-black rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5',
+              activeMobileTab === 'chat'
+                ? 'bg-white text-emerald-700 shadow-sm ring-1 ring-black/[0.02]'
+                : 'text-slate-500 hover:text-slate-800'
+            )}
+          >
+            <Sparkles size={12} className={activeMobileTab === 'chat' ? 'text-emerald-600' : 'text-slate-400'} />
+            Chat Pecuario
+          </button>
+          <button
+            onClick={() => setActiveMobileTab('vision')}
+            className={clsx(
+              'flex-1 py-2 text-xs font-black rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5',
+              activeMobileTab === 'vision'
+                ? 'bg-white text-emerald-700 shadow-sm ring-1 ring-black/[0.02]'
+                : 'text-slate-500 hover:text-slate-800'
+            )}
+          >
+            <Camera size={12} className={activeMobileTab === 'vision' ? 'text-emerald-600' : 'text-slate-400'} />
+            Control Visual
+          </button>
+          <button
+            onClick={() => setActiveMobileTab('history')}
+            className={clsx(
+              'flex-1 py-2 text-xs font-black rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5',
+              activeMobileTab === 'history'
+                ? 'bg-white text-emerald-700 shadow-sm ring-1 ring-black/[0.02]'
+                : 'text-slate-500 hover:text-slate-800'
+            )}
+          >
+            <History size={12} className={activeMobileTab === 'history' ? 'text-emerald-600' : 'text-slate-400'} />
+            Historial
+          </button>
         </div>
 
-        <div className="min-h-[46dvh] flex-1 space-y-4 overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50 p-3 shadow-inner sm:p-4 lg:min-h-0">
-          {messages.map((msg) => (
-            <MessageBubble key={msg.id} message={msg} />
-          ))}
-          {isTyping && <TypingIndicator />}
-          <div ref={bottomRef} />
-        </div>
+        {/* CHAT TAB CONTENT (Mobile) or ALWAYS VISIBLE (Desktop) */}
+        {activeMobileTab === 'chat' && (
+          <div className="flex min-h-0 flex-col flex-1 animate-fade-in">
+            {/* Suggested prompts */}
+            <div className="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:mb-4 sm:px-0 shrink-0">
+              {SUGGESTED_PROMPTS.map((prompt) => (
+                <button
+                  key={prompt}
+                  onClick={() => sendMessage(prompt)}
+                  disabled={isTyping}
+                  className="flex flex-shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 shadow-sm transition-all duration-200 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Sparkles size={11} className="text-emerald-500" />
+                  {prompt}
+                </button>
+              ))}
+            </div>
 
-        <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm sm:mt-4 sm:p-3">
-          <div className="flex items-end gap-2">
-            <button
-              type="button"
-              onClick={toggleVoiceRecording}
-              className={clsx(
-                'mb-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all',
-                isListening ? 'bg-amber-300 text-slate-950 shadow-lg shadow-amber-300/20' : 'bg-slate-100 text-slate-600 hover:bg-emerald-100 hover:text-emerald-700',
-              )}
-              title={isListening ? 'Detener grabacion' : 'Registrar por voz'}
-            >
-              {isListening ? <Loader size={18} className="animate-spin" /> : <Mic size={18} />}
-            </button>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="mb-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-all hover:bg-emerald-100 hover:text-emerald-700"
-              title="Subir imagen"
-            >
-              <ImagePlus size={18} />
-            </button>
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-            <textarea
-              id="vetcoach-input"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Escribe una orden: produccion, alimentacion, ingresos, fotos o alertas..."
-              rows={1}
-              disabled={isTyping}
-              className="max-h-28 min-h-[44px] flex-1 resize-none overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm leading-relaxed text-slate-800 placeholder-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50 sm:px-4"
-            />
-            <button
-              id="send-message-btn"
-              onClick={() => sendMessage()}
-              disabled={!input.trim() || isTyping}
-              className={clsx(
-                'mb-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-200',
-                input.trim() && !isTyping
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 hover:scale-105 hover:bg-emerald-700'
-                  : 'cursor-not-allowed bg-slate-100 text-slate-400',
-              )}
-            >
-              {isTyping ? <Loader size={18} className="animate-spin" /> : <Send size={18} />}
-            </button>
+            {/* Chat history */}
+            <div className="flex-1 space-y-4 overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50 p-3 shadow-inner sm:p-4 min-h-0">
+              {messages.map((msg) => (
+                <MessageBubble key={msg.id} message={msg} />
+              ))}
+              {isTyping && <TypingIndicator />}
+              <div ref={bottomRef} />
+            </div>
+
+            {/* Input area */}
+            <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm sm:mt-4 sm:p-3 shrink-0">
+              <div className="flex items-end gap-2">
+                <button
+                  type="button"
+                  onClick={toggleVoiceRecording}
+                  className={clsx(
+                    'mb-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all',
+                    isListening ? 'bg-amber-300 text-slate-950 shadow-lg shadow-amber-300/20' : 'bg-slate-100 text-slate-600 hover:bg-emerald-100 hover:text-emerald-700',
+                  )}
+                  title={isListening ? 'Detener grabacion' : 'Registrar por voz'}
+                >
+                  {isListening ? <Loader size={18} className="animate-spin" /> : <Mic size={18} />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="mb-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-all hover:bg-emerald-100 hover:text-emerald-700"
+                  title="Subir imagen"
+                >
+                  <ImagePlus size={18} />
+                </button>
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                <textarea
+                  id="vetcoach-input"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Escribe una orden: produccion, alimentacion, ingresos, fotos o alertas..."
+                  rows={1}
+                  disabled={isTyping}
+                  className="max-h-28 min-h-[44px] flex-1 resize-none overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm leading-relaxed text-slate-800 placeholder-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50 sm:px-4"
+                />
+                <button
+                  id="send-message-btn"
+                  onClick={() => sendMessage()}
+                  disabled={!input.trim() || isTyping}
+                  className={clsx(
+                    'mb-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-200',
+                    input.trim() && !isTyping
+                      ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 hover:scale-105 hover:bg-emerald-700'
+                      : 'cursor-not-allowed bg-slate-100 text-slate-400',
+                  )}
+                >
+                  {isTyping ? <Loader size={18} className="animate-spin" /> : <Send size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <p className="mt-3 text-center text-xs font-medium text-slate-500 shrink-0">
+              IAVet orienta y automatiza registros; decisiones sanitarias criticas requieren un veterinario.
+            </p>
           </div>
+        )}
+
+        {/* Desktop Always Visible & Mobile Tab conditional */}
+        <div className="hidden lg:flex min-h-0 flex-col flex-1">
+          {/* Suggested prompts */}
+          <div className="-mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:mb-4 sm:px-0 shrink-0">
+            {SUGGESTED_PROMPTS.map((prompt) => (
+              <button
+                key={prompt}
+                onClick={() => sendMessage(prompt)}
+                disabled={isTyping}
+                className="flex flex-shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 shadow-sm transition-all duration-200 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Sparkles size={11} className="text-emerald-500" />
+                {prompt}
+              </button>
+            ))}
+          </div>
+
+          {/* Chat history */}
+          <div className="flex-1 space-y-4 overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50 p-3 shadow-inner sm:p-4 min-h-0">
+            {messages.map((msg) => (
+              <MessageBubble key={msg.id} message={msg} />
+            ))}
+            {isTyping && <TypingIndicator />}
+            <div ref={bottomRef} />
+          </div>
+
+          {/* Input area */}
+          <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm sm:mt-4 sm:p-3 shrink-0">
+            <div className="flex items-end gap-2">
+              <button
+                type="button"
+                onClick={toggleVoiceRecording}
+                className={clsx(
+                  'mb-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all',
+                  isListening ? 'bg-amber-300 text-slate-950 shadow-lg shadow-amber-300/20' : 'bg-slate-100 text-slate-600 hover:bg-emerald-100 hover:text-emerald-700',
+                )}
+                title={isListening ? 'Detener grabacion' : 'Registrar por voz'}
+              >
+                {isListening ? <Loader size={18} className="animate-spin" /> : <Mic size={18} />}
+              </button>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="mb-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-all hover:bg-emerald-100 hover:text-emerald-700"
+                title="Subir imagen"
+              >
+                <ImagePlus size={18} />
+              </button>
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              <textarea
+                id="vetcoach-input-desktop"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Escribe una orden: produccion, alimentacion, ingresos, fotos o alertas..."
+                rows={1}
+                disabled={isTyping}
+                className="max-h-28 min-h-[44px] flex-1 resize-none overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm leading-relaxed text-slate-800 placeholder-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50 sm:px-4"
+              />
+              <button
+                id="send-message-btn-desktop"
+                onClick={() => sendMessage()}
+                disabled={!input.trim() || isTyping}
+                className={clsx(
+                  'mb-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-200',
+                  input.trim() && !isTyping
+                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 hover:scale-105 hover:bg-emerald-700'
+                    : 'cursor-not-allowed bg-slate-100 text-slate-400',
+                )}
+              >
+                {isTyping ? <Loader size={18} className="animate-spin" /> : <Send size={18} />}
+              </button>
+            </div>
+          </div>
+
+          <p className="mt-3 text-center text-xs font-medium text-slate-500 shrink-0">
+            IAVet orienta y automatiza registros; decisiones sanitarias criticas requieren un veterinario.
+          </p>
         </div>
 
-        <div className="mt-4 lg:hidden">
-          <VisionAssistant />
-        </div>
+        {/* MOBILE VISION TAB CONTENT */}
+        {activeMobileTab === 'vision' && (
+          <div className="flex-1 overflow-y-auto lg:hidden animate-fade-in pb-4 min-h-0">
+            <VisionAssistant />
+          </div>
+        )}
 
-        <p className="mt-3 text-center text-xs font-medium text-slate-500">
-          IAVet orienta y automatiza registros; decisiones sanitarias criticas requieren un veterinario.
-        </p>
+        {/* MOBILE HISTORY TAB CONTENT */}
+        {activeMobileTab === 'history' && (
+          <div className="flex-1 overflow-y-auto lg:hidden animate-fade-in pb-4 min-h-0 space-y-4">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-sm font-black text-slate-900">Historial visual</h3>
+                <span className="badge-info">IA</span>
+              </div>
+              <div className="space-y-2">
+                {visualHistory.map((item) => (
+                  <div key={item.id} className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-black text-slate-900">{item.title}</p>
+                      <span className="text-[11px] font-bold text-emerald-700">{item.confidence}%</span>
+                    </div>
+                    <p className="mt-1 text-[11px] font-medium text-slate-500">
+                      {item.date} · {item.category}{item.count ? ` · ${item.count} detectados` : ''}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
+      {/* DESKTOP ASIDE (Always visible on lg) */}
       <aside className="hidden min-h-0 space-y-4 overflow-y-auto lg:block">
         <VisionAssistant />
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm animate-fade-in">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-sm font-black text-slate-900">Historial visual</h3>
             <span className="badge-info">IA</span>
