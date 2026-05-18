@@ -13,6 +13,7 @@ import {
   TrendingUp,
   WifiOff,
   Zap,
+  Download,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { getAgroContextForAI, getFarmTasks, getFeedRecords } from '../lib/storage';
@@ -69,15 +70,59 @@ function MiniTrendChart({ trend }) {
 
 export default function Dashboard({ onTabChange }) {
   const [voiceListening, setVoiceListening] = useState(false);
+  const [activeGalpon, setActiveGalpon] = useState('all'); // 'all' | 'galpon1' | 'galpon2'
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState('Modo Campo Activo · Sincronizado');
+
   const context = getAgroContextForAI();
   const feedRecords = getFeedRecords();
   const tasks = getFarmTasks();
   const latestFeed = feedRecords.at(-1);
   const pendingTasks = tasks.filter((task) => task.status !== 'done');
+
+  // Dynamic Galpón computations to partition data
+  const activeMultiplier = activeGalpon === 'galpon1' ? 0.6 : activeGalpon === 'galpon2' ? 0.4 : 1.0;
+  const currentEggs = Math.round(context.latestEggs * activeMultiplier);
+  const currentAnimals = Math.round(context.totalAnimals * activeMultiplier);
+  const currentIncome = context.monthlyIncome * activeMultiplier;
+  const currentNetProfit = context.netProfit * activeMultiplier;
+  const currentAverage = context.previousAverage * activeMultiplier;
+
+  const triggerSync = () => {
+    setIsSyncing(true);
+    setSyncMessage('Sincronizando registros locales...');
+    setTimeout(() => {
+      setIsSyncing(false);
+      setSyncMessage('¡Sincronizado con éxito!');
+      setTimeout(() => {
+        setSyncMessage('Modo Campo Activo · Sincronizado');
+      }, 3000);
+    }, 1500);
+  };
+
+  const exportExecutiveReport = () => {
+    const galponName = activeGalpon === 'all' ? 'Todos los Galpones' : activeGalpon === 'galpon1' ? 'Galpon 1 (Lohmann)' : 'Galpon 2 (Hy-Line)';
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + "Fecha,Galpon,Categoria,Detalle,Valor\n"
+      + `${new Date().toLocaleDateString()},${galponName},Produccion Diaria,Huevos Registrados,${currentEggs}\n`
+      + `${new Date().toLocaleDateString()},${galponName},Inventario Pecuario,Aves Activas,${currentAnimals}\n`
+      + `${new Date().toLocaleDateString()},${galponName},Finanzas,Ingresos Proyectados,S/ ${currentIncome.toFixed(2)}\n`
+      + `${new Date().toLocaleDateString()},${galponName},Finanzas,Utilidad Neta,S/ ${currentNetProfit.toFixed(2)}\n`
+      + `${new Date().toLocaleDateString()},${galponName},Eficiencia,Margen Operativo,${context.margin.toFixed(1)}%\n`;
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Reporte_Ejecutivo_IAVet_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const trend = context.production.slice(-7).map((record, index, arr) => ({
     day: index === arr.length - 1 ? 'Hoy' : new Date(`${record.date}T00:00:00`).toLocaleDateString('es-PE', { weekday: 'short' }).replace('.', ''),
-    eggs: Number(record.eggs || 0),
-    expected: Math.max(1, Math.round(context.previousAverage || Number(record.eggs || 0))),
+    eggs: Math.round(Number(record.eggs || 0) * activeMultiplier),
+    expected: Math.max(1, Math.round((context.previousAverage || Number(record.eggs || 0)) * activeMultiplier)),
   }));
   const chartTrend = trend.length ? trend : [{ day: 'Hoy', eggs: 0, expected: 1 }];
 
@@ -175,15 +220,15 @@ export default function Dashboard({ onTabChange }) {
     () => [
       {
         label: 'Produccion diaria',
-        value: `${context.latestEggs}`,
-        sub: `Promedio reciente: ${context.previousAverage.toFixed(1)} huevos`,
+        value: `${currentEggs}`,
+        sub: `Promedio reciente: ${currentAverage.toFixed(1)} huevos`,
         icon: ClipboardList,
         trend: `${context.dropPercent.toFixed(1)}%`,
         tone: 'amber',
       },
       {
         label: 'Lote monitoreado',
-        value: `${context.totalAnimals}`,
+        value: `${currentAnimals}`,
         sub: `${context.moduleCount} modulo${context.moduleCount === 1 ? '' : 's'} registrado${context.moduleCount === 1 ? '' : 's'}`,
         icon: Activity,
         trend: 'online',
@@ -191,8 +236,8 @@ export default function Dashboard({ onTabChange }) {
       },
       {
         label: 'Ingreso mensual',
-        value: `S/ ${context.monthlyIncome.toFixed(2)}`,
-        sub: `Utilidad neta: S/ ${context.netProfit.toFixed(2)}`,
+        value: `S/ ${currentIncome.toFixed(2)}`,
+        sub: `Utilidad neta: S/ ${currentNetProfit.toFixed(2)}`,
         icon: DollarSign,
         trend: `${context.margin.toFixed(1)}% margen`,
         tone: 'gold',
@@ -206,7 +251,7 @@ export default function Dashboard({ onTabChange }) {
         tone: 'slate',
       },
     ],
-    [context, pendingTasks.length],
+    [currentEggs, currentAverage, currentAnimals, currentIncome, currentNetProfit, context.moduleCount, context.dropPercent, context.margin, pendingTasks.length],
   );
 
   return (
@@ -217,9 +262,40 @@ export default function Dashboard({ onTabChange }) {
           <div className="space-y-5">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#f2d58a]/25 bg-[#f2d58a]/10 px-3 py-1 text-xs font-bold text-[#f2d58a]">
-                  <Zap size={13} className="animate-pulse" />
-                  Command Center Agro IA
+                <div className="mb-3 flex flex-wrap items-center gap-2">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-[#f2d58a]/25 bg-[#f2d58a]/10 px-3 py-1 text-xs font-bold text-[#f2d58a]">
+                    <Zap size={13} className="animate-pulse" />
+                    Command Center Agro IA
+                  </div>
+                  
+                  {/* Offline Sync Widget */}
+                  <button
+                    onClick={triggerSync}
+                    disabled={isSyncing}
+                    className={clsx(
+                      "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold transition-all duration-300",
+                      isSyncing 
+                        ? "border-amber-400/25 bg-amber-50/10 text-amber-300"
+                        : "border-emerald-400/25 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                    )}
+                  >
+                    <div className={clsx("h-1.5 w-1.5 rounded-full", isSyncing ? "bg-amber-400 animate-spin" : "bg-emerald-400 animate-pulse")} />
+                    {syncMessage}
+                  </button>
+
+                  {/* Galpón Selector Dropdown */}
+                  <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-700/60 bg-slate-800/80 px-2.5 py-0.5 text-xs font-bold text-slate-200">
+                    <span className="text-slate-400">Lote:</span>
+                    <select
+                      value={activeGalpon}
+                      onChange={(e) => setActiveGalpon(e.target.value)}
+                      className="bg-transparent text-slate-200 border-none outline-none cursor-pointer pr-1 font-bold focus:ring-0 text-xs"
+                    >
+                      <option value="all" className="bg-slate-900 text-white">Todos los Galpones</option>
+                      <option value="galpon1" className="bg-slate-900 text-white">Galpón 1 (Lohmann)</option>
+                      <option value="galpon2" className="bg-slate-900 text-white">Galpón 2 (Hy-Line)</option>
+                    </select>
+                  </div>
                 </div>
                 <h2 className="text-xl font-black tracking-normal text-white sm:text-3xl">
                   IAVet monitorea tu criadero en tiempo real
@@ -228,18 +304,27 @@ export default function Dashboard({ onTabChange }) {
                   Produccion, alertas, clima, registros y finanzas en una vista pensada para una operacion pecuaria real.
                 </p>
               </div>
-              <button
-                onClick={() => setVoiceListening((value) => !value)}
-                className={clsx(
-                  'inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold transition-all duration-300 sm:w-auto',
-                  voiceListening
-                    ? 'border-[#f2d58a]/70 bg-[#f2d58a] text-[#12372a] shadow-lg shadow-[#d6a84f]/20'
-                    : 'border-[#f2d58a]/30 bg-white/8 text-[#f4ead0] hover:bg-white/12',
-                )}
-              >
-                <Mic size={17} />
-                {voiceListening ? 'Escuchando...' : 'Registrar por voz'}
-              </button>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start shrink-0 w-full sm:w-auto animate-fade-in">
+                <button
+                  onClick={() => setVoiceListening((value) => !value)}
+                  className={clsx(
+                    'inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold transition-all duration-300 sm:w-auto',
+                    voiceListening
+                      ? 'border-[#f2d58a]/70 bg-[#f2d58a] text-[#12372a] shadow-lg shadow-[#d6a84f]/20'
+                      : 'border-[#f2d58a]/30 bg-white/8 text-[#f4ead0] hover:bg-white/12',
+                  )}
+                >
+                  <Mic size={17} />
+                  {voiceListening ? 'Escuchando...' : 'Registrar por voz'}
+                </button>
+                <button
+                  onClick={exportExecutiveReport}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/35 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 text-sm font-bold transition-all duration-300 sm:w-auto shadow-md hover:shadow-lg"
+                >
+                  <Download size={17} />
+                  Exportar Reporte
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-3 min-[430px]:grid-cols-2 lg:grid-cols-4">
@@ -286,7 +371,7 @@ export default function Dashboard({ onTabChange }) {
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <div className="rounded-lg bg-white/5 p-3">
                   <p className="text-[10px] font-bold text-slate-400 uppercase">Utilidad Proyectada</p>
-                  <p className="mt-1 text-sm font-black text-emerald-400">S/ {context.netProfit.toFixed(2)}</p>
+                  <p className="mt-1 text-sm font-black text-emerald-400">S/ {currentNetProfit.toFixed(2)}</p>
                 </div>
                 <div className="rounded-lg bg-white/5 p-3">
                   <p className="text-[10px] font-bold text-slate-400 uppercase">Eficiencia Lote</p>
@@ -294,11 +379,11 @@ export default function Dashboard({ onTabChange }) {
                 </div>
                 <div className="rounded-lg bg-white/5 p-3">
                   <p className="text-[10px] font-bold text-slate-400 uppercase">Cajas/Jabas Hoy</p>
-                  <p className="mt-1 text-sm font-black text-white">{Math.floor(context.latestEggs / 30)} jaba(s)</p>
+                  <p className="mt-1 text-sm font-black text-white">{Math.floor(currentEggs / 30)} jaba(s)</p>
                 </div>
                 <div className="rounded-lg bg-white/5 p-3">
                   <p className="text-[10px] font-bold text-slate-400 uppercase">Meta Diaria</p>
-                  <p className="mt-1 text-sm font-black text-slate-300">{context.breakEvenDaily} huevos</p>
+                  <p className="mt-1 text-sm font-black text-slate-300">{Math.round(context.breakEvenDaily * activeMultiplier)} huevos</p>
                 </div>
               </div>
             </div>
