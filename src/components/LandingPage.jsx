@@ -4,12 +4,16 @@ import { supabase } from '../lib/supabaseClient';
 
 function FeatureCard({ icon: Icon, title, description }) {
   return (
-    <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-emerald-100 group">
-      <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110">
-        <Icon size={26} className="text-emerald-600" />
+    <div className="bg-white p-8 rounded-2xl border-2 border-slate-200/80 shadow-lg shadow-slate-200/60 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-900/10 hover:border-emerald-500 group relative overflow-hidden flex flex-col justify-between">
+      {/* Top glowing decorative accent */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div>
+        <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-100/80 flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-110 group-hover:bg-emerald-600">
+          <Icon size={26} className="text-emerald-600 transition-colors duration-300 group-hover:text-white" />
+        </div>
+        <h3 className="text-xl font-bold text-slate-900 mb-3">{title}</h3>
+        <p className="text-slate-600 leading-relaxed text-sm">{description}</p>
       </div>
-      <h3 className="text-xl font-bold text-slate-900 mb-3">{title}</h3>
-      <p className="text-slate-600 leading-relaxed text-sm">{description}</p>
     </div>
   );
 }
