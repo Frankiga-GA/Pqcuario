@@ -49,17 +49,17 @@ export const aiResponses = {
   produccion: {
     keywords: ['huevo', 'huevos', 'produccion', 'recogi', 'postura', 'registro', 'registre'],
     responses: [
-      'Esperando datos de producción para analizar...',
+      '¡Claro que sí! Estoy súper atento y esperando tus registros de producción para calcular la postura del día, analizar las tendencias y alertarte sobre la salud de tus aves en el galpón. ¡Vamos a cuidar a tus gallinas juntos! 🐔🥚',
     ],
   },
   finanzas: {
     keywords: ['ganar', 'ganare', 'ingreso', 'utilidad', 'margen', 'precio', 'venta', 'mes'],
     responses: [
-      'Registra datos en la calculadora para ver proyecciones financieras.',
+      '¡Excelente idea revisar los números de la campaña! Ingresa tus costos de alimento y precios de venta en la calculadora para proyectar tus ingresos, utilidades y margen neto al instante. ¡Hagamos que tu granja rinda al máximo! 💰📈',
     ],
   },
   default: [
-    '**Hola, soy IAVet Agro IA.**\n\nEstoy listo para operar con tus datos reales de Supabase.',
+    '**¡Hola, amigo productor! 🧑‍🌾 Soy IAVet, tu asistente virtual inteligente.**\n\nEstoy muy feliz de saludarte y listo para ayudarte a monitorear y cuidar tu criadero. 🐔🥚\n\nYa me conecté con éxito a tu base de datos en **Supabase** en tiempo real. Ahora puedo registrar tu producción de huevos, analizar el consumo de alimento y calcular tus ganancias al instante.\n\nEscríbeme con total confianza o mándame una foto/audio desde el campo. ¡Hagamos crecer tu granja juntos! 🚀📈',
   ],
 };
 
