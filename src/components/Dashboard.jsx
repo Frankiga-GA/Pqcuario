@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Activity,
   ArrowRight,
@@ -73,6 +73,26 @@ export default function Dashboard({ onTabChange }) {
   const [activeGalpon, setActiveGalpon] = useState('all'); // 'all' | 'galpon1' | 'galpon2'
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('Modo Campo Activo · Sincronizado');
+  const [_, setUpdateTrigger] = useState(0);
+
+  useEffect(() => {
+    const handleUpdate = () => setUpdateTrigger((prev) => prev + 1);
+
+    // List of events that affect dashboard metrics
+    window.addEventListener('iavet-daily-production-sync', handleUpdate);
+    window.addEventListener('iavet-egg-calculator-sync', handleUpdate);
+    window.addEventListener('iavet-farm-tasks-sync', handleUpdate);
+    window.addEventListener('iavet-livestock-modules-sync', handleUpdate);
+    window.addEventListener('iavet-feed-records-sync', handleUpdate);
+
+    return () => {
+      window.removeEventListener('iavet-daily-production-sync', handleUpdate);
+      window.removeEventListener('iavet-egg-calculator-sync', handleUpdate);
+      window.removeEventListener('iavet-farm-tasks-sync', handleUpdate);
+      window.removeEventListener('iavet-livestock-modules-sync', handleUpdate);
+      window.removeEventListener('iavet-feed-records-sync', handleUpdate);
+    };
+  }, []);
 
   const context = getAgroContextForAI();
   const feedRecords = getFeedRecords();
