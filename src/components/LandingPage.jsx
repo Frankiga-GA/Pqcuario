@@ -361,26 +361,40 @@ export default function LandingPage() {
             className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-fade-in"
             onClick={() => !isLoading && setShowLogin(false)}
           />
-          <div className="bg-white w-full max-w-md p-8 rounded-2xl relative z-10 animate-slide-up shadow-2xl border border-slate-100">
-            <button 
-              onClick={() => setShowLogin(false)}
-              disabled={isLoading}
-              className="absolute top-4 right-4 p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors disabled:opacity-50"
-            >
-              <X size={20} />
-            </button>
-            
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-4">
-                <Bot size={32} className="text-emerald-600" />
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-2 tracking-tight">
-                {isSignUp ? 'Crea tu cuenta' : 'Bienvenido de vuelta'}
-              </h3>
-              <p className="text-slate-500 text-sm">
-                {isSignUp ? 'Únete a Pqcuario e IAVet hoy' : 'Ingresa a tu cuenta para continuar'}
-              </p>
+          <div className="bg-white w-full max-w-md rounded-2xl relative z-10 animate-slide-up shadow-2xl shadow-slate-900/20 border border-slate-100 overflow-hidden">
+            {/* Illustrated Banner Header */}
+            <div className="relative h-32 w-full bg-slate-900 overflow-hidden">
+              <img 
+                src="/aviculture_hero_bg.png" 
+                alt="Pqcuario Farm Banner" 
+                className="absolute inset-0 w-full h-full object-cover opacity-60"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/80 to-transparent"></div>
+              
+              <button 
+                onClick={() => setShowLogin(false)}
+                disabled={isLoading}
+                className="absolute top-4 right-4 p-2 rounded-full text-white/80 hover:text-white hover:bg-white/20 transition-colors disabled:opacity-50 z-10 backdrop-blur-md"
+              >
+                <X size={20} />
+              </button>
             </div>
+
+            <div className="p-8 pt-0">
+              {/* Overlapping Logo */}
+              <div className="text-center mb-8 -mt-10 relative z-20">
+                <div className="w-20 h-20 rounded-2xl bg-white p-1.5 shadow-xl shadow-slate-200/50 mx-auto mb-4 border border-slate-100">
+                  <div className="w-full h-full rounded-xl bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center border border-emerald-100/50">
+                    <Bot size={36} className="text-emerald-600 drop-shadow-sm" />
+                  </div>
+                </div>
+                <h3 className="text-2xl font-black text-slate-900 mb-1.5 tracking-tight">
+                  {isSignUp ? 'Crea tu cuenta' : 'Bienvenido de vuelta'}
+                </h3>
+                <p className="text-slate-500 text-sm font-medium">
+                  {isSignUp ? 'Únete a Pqcuario e IAVet hoy' : 'Ingresa a tu cuenta para continuar'}
+                </p>
+              </div>
 
             {error && (
               <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-100 flex items-start gap-3 text-red-700 text-sm animate-shake">
@@ -443,6 +457,7 @@ export default function LandingPage() {
                 {isSignUp ? '¿Ya tienes una cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate aquí'}
               </button>
             </div>
+          </div>
           </div>
         </div>
       )}
