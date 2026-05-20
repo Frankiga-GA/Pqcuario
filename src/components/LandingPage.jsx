@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShieldCheck, Bot, HeartPulse, X, ArrowRight, Activity, Zap, Loader2, PlayCircle, BarChart3, TrendingUp, CheckCircle2, AlertCircle, Quote } from 'lucide-react';
+import { ShieldCheck, Bot, HeartPulse, X, ArrowRight, Activity, Zap, Loader2, PlayCircle, BarChart3, TrendingUp, CheckCircle2, AlertCircle, Quote, Camera, Cpu, LineChart, Star, Globe, MessageCircle, Share2, Mail, MapPin, Phone } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
 function FeatureCard({ icon: Icon, title, description }) {
@@ -353,6 +353,205 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* --- HOW IT WORKS SECTION --- */}
+      <section className="bg-slate-50 py-24 relative z-20 border-t border-slate-100 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-xs text-emerald-600 font-extrabold uppercase tracking-widest">Flujo de Trabajo</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mt-2 mb-4 tracking-tight">¿Cómo funciona Pqcuario?</h2>
+            <p className="text-slate-600">Un proceso diseñado para ser ejecutado directamente desde el galpón, sin complicaciones técnicas.</p>
+          </div>
+
+          <div className="relative grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-8">
+            {/* Connecting line for desktop */}
+            <div className="hidden md:block absolute top-12 left-[15%] right-[15%] h-0.5 bg-gradient-to-r from-emerald-100 via-emerald-300 to-emerald-100 border-t border-dashed border-emerald-400 z-0" />
+            
+            <div className="relative z-10 flex flex-col items-center text-center">
+              <div className="w-24 h-24 rounded-full bg-white border-4 border-emerald-50 shadow-xl shadow-emerald-900/5 flex items-center justify-center mb-6">
+                <Camera size={40} className="text-emerald-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">1. Toma la Foto</h3>
+              <p className="text-slate-600 text-sm">El galponero toma una fotografía rápida a la bandeja de huevos recién recolectada desde su celular.</p>
+            </div>
+
+            <div className="relative z-10 flex flex-col items-center text-center">
+              <div className="w-24 h-24 rounded-full bg-white border-4 border-emerald-50 shadow-xl shadow-emerald-900/5 flex items-center justify-center mb-6">
+                <Cpu size={40} className="text-emerald-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">2. Análisis IAVet</h3>
+              <p className="text-slate-600 text-sm">Nuestra IA procesa la imagen en 3 segundos, contando huevos sanos y detectando merma rota o sucia.</p>
+            </div>
+
+            <div className="relative z-10 flex flex-col items-center text-center">
+              <div className="w-24 h-24 rounded-full bg-white border-4 border-emerald-50 shadow-xl shadow-emerald-900/5 flex items-center justify-center mb-6">
+                <LineChart size={40} className="text-emerald-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">3. Optimiza Utilidades</h3>
+              <p className="text-slate-600 text-sm">Los datos se sincronizan con tu panel financiero para calcular márgenes de ganancia y reducir costos de alimento.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- PRICING SECTION --- */}
+      <section className="bg-white py-24 relative z-20 border-t border-slate-100">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-xs text-emerald-600 font-extrabold uppercase tracking-widest">Planes Accesibles</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mt-2 mb-4 tracking-tight">Elige el plan ideal para tu granja</h2>
+            <p className="text-slate-600">Tecnología de clase mundial a un costo adaptado a la avicultura regional.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-center">
+            {/* Basic Plan */}
+            <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:border-slate-300 transition-all">
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Básico</h3>
+              <div className="text-4xl font-black text-slate-900 mb-6">Gratis</div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center gap-3 text-sm text-slate-600"><CheckCircle2 size={18} className="text-emerald-500 shrink-0" /> 1 Galpón</li>
+                <li className="flex items-center gap-3 text-sm text-slate-600"><CheckCircle2 size={18} className="text-emerald-500 shrink-0" /> Calculadora Básica</li>
+                <li className="flex items-center gap-3 text-sm text-slate-600"><CheckCircle2 size={18} className="text-emerald-500 shrink-0" /> 50 Escaneos IA / mes</li>
+                <li className="flex items-center gap-3 text-sm text-slate-400"><X size={18} className="shrink-0" /> Multi-usuario</li>
+              </ul>
+              <button 
+                onClick={() => setShowLogin(true)}
+                className="w-full py-3 rounded-xl font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors"
+              >
+                Comenzar Básico
+              </button>
+            </div>
+
+            {/* Pro Plan (Highlighted) */}
+            <div className="bg-emerald-900 rounded-3xl p-8 border-2 border-emerald-400 shadow-2xl shadow-emerald-900/30 relative transform md:-translate-y-4">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-900 text-xs font-black uppercase tracking-widest py-1.5 px-4 rounded-full flex items-center gap-1 shadow-lg">
+                <Star size={12} className="fill-slate-900" /> Más Popular
+              </div>
+              <h3 className="text-lg font-bold text-emerald-50 mb-2">Pro Pecuario</h3>
+              <div className="text-4xl font-black text-white mb-2">$29<span className="text-lg font-medium text-emerald-300">/mes</span></div>
+              <p className="text-emerald-200/80 text-xs mb-6 border-b border-emerald-800 pb-6">Facturado anualmente</p>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center gap-3 text-sm text-emerald-50"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> Hasta 10 Galpones</li>
+                <li className="flex items-center gap-3 text-sm text-emerald-50"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> Calculadora Avanzada + Proyección</li>
+                <li className="flex items-center gap-3 text-sm text-emerald-50"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> Escaneos IA Ilimitados</li>
+                <li className="flex items-center gap-3 text-sm text-emerald-50"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> Asistente IAVet por Voz</li>
+                <li className="flex items-center gap-3 text-sm text-emerald-50"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> Soporte Prioritario</li>
+              </ul>
+              <button 
+                onClick={() => setShowLogin(true)}
+                className="w-full py-3.5 rounded-xl font-bold text-slate-900 bg-emerald-400 hover:bg-emerald-300 shadow-lg shadow-emerald-400/20 transition-colors"
+              >
+                Prueba Pro Gratis por 14 días
+              </button>
+            </div>
+
+            {/* Enterprise Plan */}
+            <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:border-slate-300 transition-all">
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Empresarial</h3>
+              <div className="text-4xl font-black text-slate-900 mb-6">Personalizado</div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center gap-3 text-sm text-slate-600"><CheckCircle2 size={18} className="text-emerald-500 shrink-0" /> Galpones Ilimitados</li>
+                <li className="flex items-center gap-3 text-sm text-slate-600"><CheckCircle2 size={18} className="text-emerald-500 shrink-0" /> Roles Multi-usuario Avanzados</li>
+                <li className="flex items-center gap-3 text-sm text-slate-600"><CheckCircle2 size={18} className="text-emerald-500 shrink-0" /> Exportación de Reportes Financieros</li>
+                <li className="flex items-center gap-3 text-sm text-slate-600"><CheckCircle2 size={18} className="text-emerald-500 shrink-0" /> Implementación en Sitio</li>
+              </ul>
+              <button 
+                onClick={() => setShowLogin(true)}
+                className="w-full py-3 rounded-xl font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"
+              >
+                Contactar Ventas
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- FOOTER --- */}
+      <footer className="bg-slate-950 pt-20 pb-10 relative z-20 border-t border-slate-900">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
+            {/* Brand Col */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
+                  <Bot size={16} className="text-white" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-black text-white leading-none">Pqcuario</h1>
+                </div>
+              </div>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Transformando la avicultura en el sur chico del Perú mediante inteligencia artificial y visión computacional accesible.
+              </p>
+              <div className="flex gap-4">
+                <a href="#" className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-emerald-400 hover:border-emerald-400/50 transition-colors">
+                  <Globe size={18} />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-emerald-400 hover:border-emerald-400/50 transition-colors">
+                  <Share2 size={18} />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-emerald-400 hover:border-emerald-400/50 transition-colors">
+                  <MessageCircle size={18} />
+                </a>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 className="text-white font-bold mb-6">Enlaces Rápidos</h4>
+              <ul className="space-y-3">
+                <li><a href="#" className="text-slate-400 hover:text-emerald-400 text-sm transition-colors">Inicio</a></li>
+                <li><a href="#demostracion" className="text-slate-400 hover:text-emerald-400 text-sm transition-colors">Funcionalidades</a></li>
+                <li><a href="#" className="text-slate-400 hover:text-emerald-400 text-sm transition-colors">Planes y Precios</a></li>
+                <li><a href="#" className="text-slate-400 hover:text-emerald-400 text-sm transition-colors">Casos de Éxito</a></li>
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h4 className="text-white font-bold mb-6">Contacto</h4>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3 text-sm text-slate-400">
+                  <MapPin size={18} className="text-emerald-500 shrink-0 mt-0.5" />
+                  <span>Av. Panamericana Sur Km 298, Ica, Perú</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm text-slate-400">
+                  <Phone size={18} className="text-emerald-500 shrink-0" />
+                  <span>+51 987 654 321</span>
+                </li>
+                <li className="flex items-center gap-3 text-sm text-slate-400">
+                  <Mail size={18} className="text-emerald-500 shrink-0" />
+                  <span>hola@pqcuario.com</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Newsletter */}
+            <div>
+              <h4 className="text-white font-bold mb-6">Boletín Avícola</h4>
+              <p className="text-slate-400 text-sm mb-4">Recibe tips de manejo y alertas sanitarias regionales mensuales.</p>
+              <form className="flex gap-2">
+                <input 
+                  type="email" 
+                  placeholder="Tu correo" 
+                  className="bg-slate-900 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 w-full"
+                />
+                <button type="button" className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg px-4 py-2.5 transition-colors">
+                  <ArrowRight size={18} />
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-800/50 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-slate-500 text-xs">© 2026 Pqcuario. Todos los derechos reservados.</p>
+            <div className="flex gap-6">
+              <a href="#" className="text-slate-500 hover:text-slate-300 text-xs transition-colors">Privacidad</a>
+              <a href="#" className="text-slate-500 hover:text-slate-300 text-xs transition-colors">Términos</a>
+            </div>
+          </div>
+        </div>
+      </footer>
 
       {/* --- AUTH MODAL --- */}
       {showLogin && (
