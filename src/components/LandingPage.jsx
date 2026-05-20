@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShieldCheck, Bot, HeartPulse, X, ArrowRight, Activity, Zap, Loader2, PlayCircle, BarChart3, TrendingUp, CheckCircle2, AlertCircle, Quote, Camera, Cpu, LineChart, Star, Globe, MessageCircle, Share2, Mail, MapPin, Phone } from 'lucide-react';
+import { ShieldCheck, Bot, HeartPulse, X, ArrowRight, Activity, Zap, Loader2, PlayCircle, BarChart3, TrendingUp, CheckCircle2, AlertCircle, Quote, Camera, Cpu, LineChart, Star, Globe, MessageCircle, Share2, Mail, MapPin, Phone, Bird, Feather } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
 function FeatureCard({ icon: Icon, title, description }) {
@@ -139,80 +139,128 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Right Column: Live Mockup Chat Widget (Fidelity Showcase) */}
-            <div className="hidden lg:block relative w-full h-[450px] animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              {/* Soft neon decorative circles in background */}
-              <div className="absolute -top-10 -left-10 w-64 h-64 rounded-full bg-emerald-400/20 blur-3xl animate-pulse" />
-              <div className="absolute -bottom-8 -right-8 w-64 h-64 rounded-full bg-amber-400/10 blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+            {/* Right Column: Interactive Orbiting Ecosystem */}
+            <div className="hidden lg:flex relative w-full h-[500px] items-center justify-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              
+              <style>{`
+                @keyframes orbit-spin {
+                  from { transform: rotate(0deg); }
+                  to { transform: rotate(360deg); }
+                }
+                @keyframes counter-spin {
+                  from { transform: rotate(360deg); }
+                  to { transform: rotate(0deg); }
+                }
+                .orbit-container {
+                  animation: orbit-spin 40s linear infinite;
+                }
+                .orbit-item {
+                  animation: counter-spin 40s linear infinite;
+                }
+                .orbit-container:hover, .orbit-container:hover .orbit-item {
+                  animation-play-state: paused;
+                }
+                .egg-shape {
+                  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+                }
+              `}</style>
 
-              {/* Floating Chat Mockup */}
-              <div className="relative w-full h-full rounded-3xl border border-white/40 bg-white/60 backdrop-blur-xl shadow-2xl overflow-hidden flex flex-col">
-                {/* Mockup Header */}
-                <div className="px-5 py-4 border-b border-slate-200/40 bg-white/80 backdrop-blur-sm flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center">
-                      <Bot size={18} className="text-emerald-700" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900 leading-none">Asistente IAVet</h4>
-                      <span className="text-[10px] text-emerald-600 font-bold leading-none uppercase tracking-wider">Modo Inteligente</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-                  </div>
-                </div>
+              {/* Background Glows */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-emerald-400/20 blur-3xl animate-pulse" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-amber-400/10 blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
 
-                {/* Mockup Chat Area */}
-                <div className="flex-1 p-5 space-y-4 overflow-y-auto min-h-0 text-left">
-                  {/* User message */}
-                  <div className="flex gap-3 justify-end">
-                    <div className="bg-emerald-600 text-white rounded-2xl rounded-tr-none px-4 py-2.5 text-xs font-semibold max-w-[80%] shadow-sm">
-                      <p className="mb-2">Analiza la recolección de este galpón:</p>
-                      <div className="relative rounded-lg overflow-hidden border border-emerald-500/30">
-                        <img 
-                          src="https://images.unsplash.com/photo-1516448620398-c5f44bf9f441?q=80&w=300&auto=format&fit=crop" 
-                          alt="Bandeja de huevos" 
-                          className="w-full h-24 object-cover"
-                        />
-                        <div className="absolute inset-0 bg-emerald-950/20 backdrop-blur-[1px] flex items-center justify-center">
-                          <span className="px-2 py-1 rounded bg-black/60 text-[10px] font-bold text-white tracking-widest uppercase">Foto Escaneada</span>
-                        </div>
-                      </div>
+              {/* The Orbiting Rings */}
+              {/* Outer Ring */}
+              <div className="absolute w-[450px] h-[450px] rounded-full border border-emerald-500/20 orbit-container flex items-center justify-center">
+                {/* Orbit Item 1: Egg */}
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 orbit-item group cursor-pointer z-30">
+                  <div className="relative">
+                    {/* Glow */}
+                    <div className="absolute inset-0 bg-emerald-400 blur-md opacity-0 group-hover:opacity-50 transition-opacity" />
+                    {/* Egg */}
+                    <div className="w-12 h-16 bg-gradient-to-br from-white via-orange-50 to-amber-100 shadow-xl border border-white/50 egg-shape flex items-center justify-center relative z-10 transform transition-transform group-hover:scale-110">
+                      <Bot size={16} className="text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
-                  </div>
-
-                  {/* AI Response */}
-                  <div className="flex gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-100 border border-emerald-200 flex items-center justify-center shrink-0">
-                      <Bot size={15} className="text-emerald-700" />
-                    </div>
-                    <div className="bg-white/95 border border-slate-100 rounded-2xl rounded-tl-none px-4 py-3 text-xs font-medium text-slate-800 max-w-[85%] shadow-md space-y-2">
-                      <p>🥚 **Análisis Visual Completado**:</p>
-                      <ul className="space-y-1 pl-1 list-disc list-inside text-[11px] text-slate-600">
-                        <li>Huevos saludables: <strong className="text-emerald-700">28 sanos</strong></li>
-                        <li>Merma detectada: <strong className="text-red-600 font-bold">2 rotos / trizados</strong></li>
-                        <li>Precisión del escaneo: <strong>98.6%</strong></li>
-                      </ul>
-                      <p className="text-[10px] text-slate-500 border-t border-slate-100 pt-1.5 font-bold leading-normal">
-                        Recomendación: El porcentaje de merma es 6.7%. Sugiero revisar la dureza de cáscara o si hay huevos atorados en el nido.
-                      </p>
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-52 bg-white/95 backdrop-blur-md text-slate-800 text-xs p-4 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-emerald-100 shadow-2xl shadow-emerald-900/20">
+                      <span className="font-black text-emerald-700 block mb-1.5 uppercase tracking-wide text-[10px]">Análisis de Huevos</span>
+                      <p className="font-medium leading-relaxed">Conteo automático y detección de merma por visión artificial IAVet.</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Mockup Input Box */}
-                <div className="p-4 border-t border-slate-200/40 bg-white/80 backdrop-blur-sm flex gap-2">
-                  <div className="flex-1 bg-slate-50 border border-slate-200/50 rounded-xl px-4 py-2.5 text-xs text-slate-400 font-bold flex items-center">
-                    Escribe tu pregunta o sube una foto...
+                {/* Orbit Item 2: Bird */}
+                <div className="absolute top-1/2 -right-6 -translate-y-1/2 orbit-item group cursor-pointer z-30">
+                  <div className="relative">
+                    <div className="w-14 h-14 rounded-full bg-white/90 backdrop-blur-md shadow-xl border border-emerald-100 flex items-center justify-center transform transition-transform group-hover:scale-110">
+                      <Bird size={24} className="text-emerald-600" />
+                    </div>
+                    <div className="absolute right-full top-1/2 -translate-y-1/2 mr-4 w-52 bg-white/95 backdrop-blur-md text-slate-800 text-xs p-4 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-emerald-100 shadow-2xl shadow-emerald-900/20">
+                      <span className="font-black text-emerald-700 block mb-1.5 uppercase tracking-wide text-[10px]">Salud del Galpón</span>
+                      <p className="font-medium leading-relaxed">Monitoreo de bioseguridad, mortalidad y peso promedio de tus aves.</p>
+                    </div>
                   </div>
-                  <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md">
-                    <ArrowRight size={16} />
+                </div>
+
+                {/* Orbit Item 3: Golden Egg */}
+                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 orbit-item group cursor-pointer z-30">
+                  <div className="relative">
+                    <div className="w-12 h-16 bg-gradient-to-br from-amber-200 via-yellow-400 to-amber-600 shadow-xl border border-amber-200/50 egg-shape flex items-center justify-center relative z-10 transform transition-transform group-hover:scale-110">
+                      <TrendingUp size={16} className="text-amber-900" />
+                    </div>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-52 bg-white/95 backdrop-blur-md text-slate-800 text-xs p-4 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-amber-200 shadow-2xl shadow-amber-900/20">
+                      <span className="font-black text-amber-600 block mb-1.5 uppercase tracking-wide text-[10px]">Proyección de Rentabilidad</span>
+                      <p className="font-medium leading-relaxed">Calcula tus márgenes diarios y optimiza la venta final según el mercado.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Orbit Item 4: Feather */}
+                <div className="absolute top-1/2 -left-6 -translate-y-1/2 orbit-item group cursor-pointer z-30">
+                  <div className="relative">
+                    <div className="w-14 h-14 rounded-full bg-white/90 backdrop-blur-md shadow-xl border border-emerald-100 flex items-center justify-center transform transition-transform group-hover:scale-110">
+                      <Feather size={24} className="text-emerald-600" />
+                    </div>
+                    <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 w-52 bg-white/95 backdrop-blur-md text-slate-800 text-xs p-4 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-emerald-100 shadow-2xl shadow-emerald-900/20">
+                      <span className="font-black text-emerald-700 block mb-1.5 uppercase tracking-wide text-[10px]">Manejo de Lotes</span>
+                      <p className="font-medium leading-relaxed">Gestión de limpieza, cronograma de vacunas e historial por galpón.</p>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              {/* Inner Ring */}
+              <div className="absolute w-[280px] h-[280px] rounded-full border border-emerald-500/30 orbit-container flex items-center justify-center" style={{ animationDuration: '25s', animationDirection: 'reverse' }}>
+                {/* Floating Data Points inside inner ring */}
+                <div className="absolute -top-4 left-1/4 orbit-item" style={{ animationDirection: 'reverse', animationDuration: '25s' }}>
+                  <div className="bg-emerald-50 text-emerald-800 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-md border border-emerald-200">
+                    +98.6% Precisión
+                  </div>
+                </div>
+                <div className="absolute bottom-10 -right-4 orbit-item" style={{ animationDirection: 'reverse', animationDuration: '25s' }}>
+                  <div className="bg-amber-50 text-amber-800 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-md border border-amber-200 flex items-center gap-1.5">
+                    <AlertCircle size={12} className="text-amber-600" />
+                    Alerta Sanitaria
+                  </div>
+                </div>
+              </div>
+
+              {/* Center Core: The AI Brain / Pqcuario Logo */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 cursor-default">
+                <div className="relative w-40 h-40 bg-white/90 backdrop-blur-xl rounded-full shadow-2xl shadow-emerald-900/20 border-4 border-white flex items-center justify-center group overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-emerald-100/50 to-teal-50/50" />
+                  {/* Pulsing rings inside */}
+                  <div className="absolute inset-0 rounded-full border-2 border-emerald-400 animate-ping opacity-30" style={{ animationDuration: '3s' }} />
+                  <div className="relative z-10 flex flex-col items-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/40 mb-2 transform transition-transform duration-500 group-hover:rotate-12">
+                      <Bot size={32} className="text-white" />
+                    </div>
+                    <span className="font-black text-slate-900 text-sm tracking-wide">IAVET</span>
+                    <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Motor Neural</span>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </main>
